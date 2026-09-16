@@ -215,9 +215,16 @@
     <a class="nav-link" onclick="scrollTo('linkedlist')"><div class="dot"></div> Linked Lists</a>
     <a class="nav-link" onclick="scrollTo('cycles')"><div class="dot"></div> Cycle Detection</a>
 
+    <div class="nav-section">Concurrency & Design</div>
+    <a class="nav-link" onclick="scrollTo('generics')"><div class="dot"></div> Generics</a>
+    <a class="nav-link" onclick="scrollTo('deadlocks')"><div class="dot"></div> Deadlocks</a>
+    <a class="nav-link" onclick="scrollTo('cleanarch')"><div class="dot"></div> Clean Architecture</a>
+
     <div class="nav-section">Cloud & Messaging</div>
     <a class="nav-link" onclick="scrollTo('sqs')"><div class="dot"></div> Amazon SQS</a>
     <a class="nav-link" onclick="scrollTo('kafka')"><div class="dot"></div> SQS vs Kafka</a>
+    <a class="nav-link" onclick="scrollTo('eventing')"><div class="dot"></div> Streaming vs Sourcing</a>
+    <a class="nav-link" onclick="scrollTo('errors')"><div class="dot"></div> Error Handling</a>
 
     <div class="nav-section">Performance</div>
     <a class="nav-link" onclick="scrollTo('loadtest')"><div class="dot"></div> Load Testing</a>
@@ -749,6 +756,345 @@
       </div>
     </div>
 
+    <!-- GENERICS -->
+    <div class="section" id="generics">
+      <div class="section-title"><span class="icon">🧬</span> Why Do We Need Generics?</div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">💡 Recommended Answer</div>
+          <span class="badge badge-orange">Core Concept</span>
+        </div>
+        <div class="task-body">
+          <p>"We need generics to write <strong>type-safe, reusable</strong> code that works with different data types without duplicating logic and without sacrificing compile-time type checking."</p>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">🔒 Type Safety</div>
+          <p>Without generics, collections stored <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Object</code>, requiring manual casting that could fail at runtime with <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">ClassCastException</code>. Generics catch these errors at compile time instead.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">♻️ Code Reusability</div>
+          <p>A single generic class like <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Box&lt;T&gt;</code> works for <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Box&lt;String&gt;</code>, <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Box&lt;Integer&gt;</code>, etc. — no need to duplicate the class per type.</p>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-box">
+          <div class="compare-header wrong">❌ Without Generics (Pre-Java 5)</div>
+<pre><span class="cls">List</span> list = <span class="kw">new</span> <span class="cls">ArrayList</span>();
+list.add(<span class="str">"hello"</span>);
+list.add(<span class="num">42</span>); <span class="cm">// no error at compile time</span>
+
+<span class="cls">String</span> s = (<span class="cls">String</span>) list.get(<span class="num">1</span>);
+<span class="cm">// ClassCastException at RUNTIME</span></pre>
+        </div>
+        <div class="compare-box">
+          <div class="compare-header right">✅ With Generics</div>
+<pre><span class="cls">List</span>&lt;<span class="cls">String</span>&gt; list = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
+list.add(<span class="str">"hello"</span>);
+list.add(<span class="num">42</span>); <span class="cm">// ❌ COMPILE-TIME error</span>
+
+<span class="cls">String</span> s = list.get(<span class="num">0</span>); <span class="cm">// no cast needed</span></pre>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🛠️ Generic Methods & Bounded Types</div>
+          <span class="badge badge-blue">Show Depth</span>
+        </div>
+        <div class="task-body">
+          <div class="code-wrap">
+            <div class="code-label">Java — Generic method with bounded type</div>
+<pre><span class="kw">public static</span> &lt;T <span class="kw">extends</span> <span class="cls">Comparable</span>&lt;T&gt;&gt; T <span class="fn">max</span>(<span class="cls">List</span>&lt;T&gt; list) {
+    T result = list.get(<span class="num">0</span>);
+    <span class="kw">for</span> (T item : list) {
+        <span class="kw">if</span> (item.compareTo(result) &gt; <span class="num">0</span>) {
+            result = item;
+        }
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// Works with any Comparable type: Integer, String, custom classes</span>
+<span class="cls">Integer</span> maxNum = <span class="fn">max</span>(<span class="cls">List</span>.of(<span class="num">3</span>, <span class="num">7</span>, <span class="num">1</span>));
+<span class="cls">String</span> maxStr = <span class="fn">max</span>(<span class="cls">List</span>.of(<span class="str">"apple"</span>, <span class="str">"banana"</span>));</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">💡</span>
+        <div><strong>Senior answer:</strong> "Generics give us compile-time type safety, eliminate unnecessary casting, enable code reuse across types, and let the compiler catch type errors early instead of failing at runtime. They're also essential for building type-safe APIs like the Collections Framework and Streams."</div>
+      </div>
+    </div>
+
+    <!-- DEADLOCKS -->
+    <div class="section" id="deadlocks">
+      <div class="section-title"><span class="icon">🔒</span> Deadlocks</div>
+
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div>This is a <strong>classic concurrency question</strong>. You need to explain what a deadlock looks like in practice AND name the 4 conditions (Coffman conditions) that must hold simultaneously.</div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🔄 What Does the Most Common Deadlock Look Like?</div>
+          <span class="badge badge-orange">Classic Pattern</span>
+        </div>
+        <div class="task-body">
+          <p>"The most common deadlock happens when <strong>two threads each hold a lock the other one needs</strong> — Thread A holds Lock 1 and waits for Lock 2, while Thread B holds Lock 2 and waits for Lock 1. Neither can proceed."</p>
+          
+          <div class="code-wrap" style="margin-top:14px;">
+            <div class="code-label">Java — Classic Two-Thread Deadlock</div>
+<pre><span class="kw">public class</span> <span class="cls">DeadlockExample</span> {
+    <span class="kw">private static final</span> <span class="cls">Object</span> lock1 = <span class="kw">new</span> <span class="cls">Object</span>();
+    <span class="kw">private static final</span> <span class="cls">Object</span> lock2 = <span class="kw">new</span> <span class="cls">Object</span>();
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Thread</span> threadA = <span class="kw">new</span> <span class="cls">Thread</span>(() -&gt; {
+            <span class="kw">synchronized</span> (lock1) {
+                <span class="fn">sleep</span>(<span class="num">100</span>);
+                <span class="kw">synchronized</span> (lock2) { <span class="cm">// waits for lock2</span>
+                    <span class="cls">System</span>.out.println(<span class="str">"Thread A acquired both"</span>);
+                }
+            }
+        });
+
+        <span class="cls">Thread</span> threadB = <span class="kw">new</span> <span class="cls">Thread</span>(() -&gt; {
+            <span class="kw">synchronized</span> (lock2) {
+                <span class="fn">sleep</span>(<span class="num">100</span>);
+                <span class="kw">synchronized</span> (lock1) { <span class="cm">// waits for lock1</span>
+                    <span class="cls">System</span>.out.println(<span class="str">"Thread B acquired both"</span>);
+                }
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+        <span class="cm">// Result: both threads block forever waiting on each other</span>
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">📋 The 4 Coffman Conditions</div>
+          <span class="badge badge-red">Must Know All 4</span>
+        </div>
+        <div class="task-body">
+          <p>"For a deadlock to occur, <strong>all four conditions</strong> must hold at the same time:"</p>
+
+          <div class="steps" style="margin-top:14px;">
+            <div class="step">
+              <div class="step-num"></div>
+              <div class="step-body">
+                <strong>Mutual Exclusion</strong>
+                <span>— At least one resource must be held in a non-shareable mode; only one thread can use it at a time (e.g. a synchronized lock).</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num"></div>
+              <div class="step-body">
+                <strong>Hold and Wait</strong>
+                <span>— A thread holding at least one resource is waiting to acquire additional resources currently held by other threads.</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num"></div>
+              <div class="step-body">
+                <strong>No Preemption</strong>
+                <span>— A resource can only be released voluntarily by the thread holding it; it cannot be forcibly taken away.</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num"></div>
+              <div class="step-body">
+                <strong>Circular Wait</strong>
+                <span>— A closed chain of threads exists where each thread waits for a resource held by the next thread in the chain (Thread A → waits for B → waits for A).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🛡️ How to Prevent Deadlocks</div>
+          <span class="badge badge-green">Follow-up Question</span>
+        </div>
+        <div class="task-body">
+          <p>Breaking <strong>any one</strong> of the 4 conditions prevents deadlock:</p>
+          <ul class="checklist">
+            <li><strong>Lock ordering:</strong> always acquire locks in the same global order (breaks circular wait)</li>
+            <li><strong>Lock timeout:</strong> use <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">tryLock(timeout)</code> instead of blocking indefinitely (breaks hold and wait)</li>
+            <li><strong>Avoid nested locks:</strong> minimize holding multiple locks simultaneously</li>
+            <li><strong>Use higher-level concurrency utilities:</strong> <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">java.util.concurrent</code> (ConcurrentHashMap, ExecutorService) instead of manual locking</li>
+          </ul>
+
+          <div class="code-wrap" style="margin-top:12px;">
+            <div class="code-label">Java — Prevention with tryLock</div>
+<pre><span class="kw">if</span> (lock1.tryLock(<span class="num">1</span>, TimeUnit.SECONDS)) {
+    <span class="kw">try</span> {
+        <span class="kw">if</span> (lock2.tryLock(<span class="num">1</span>, TimeUnit.SECONDS)) {
+            <span class="kw">try</span> { <span class="cm">/* critical section */</span> }
+            <span class="kw">finally</span> { lock2.unlock(); }
+        }
+    } <span class="kw">finally</span> { lock1.unlock(); }
+}
+<span class="cm">// If lock2 can't be acquired, thread backs off instead of blocking forever</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">💡</span>
+        <div><strong>Senior answer:</strong> "A deadlock happens when two or more threads each hold a resource the other needs, and neither releases it. For this to occur, four conditions must hold simultaneously: mutual exclusion, hold and wait, no preemption, and circular wait. In practice, I prevent this by enforcing a consistent lock acquisition order across the codebase and using tryLock with timeouts instead of indefinite blocking."</div>
+      </div>
+    </div>
+
+    <!-- CLEAN ARCHITECTURE -->
+    <div class="section" id="cleanarch">
+      <div class="section-title"><span class="icon">🏛️</span> Clean Architecture</div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">💡 What Is Clean Architecture?</div>
+          <span class="badge badge-orange">Core Concept</span>
+        </div>
+        <div class="task-body">
+          <p>"Clean Architecture is a way of organizing code so that <strong>business logic doesn't depend on frameworks, databases, or UI</strong>. Dependencies point inward — toward the domain — so the core of the application can be tested and changed independently of technical details."</p>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🎯 The Dependency Rule</div>
+          <span class="badge badge-blue">Key Principle</span>
+        </div>
+        <div class="task-body">
+          <p>"Source code dependencies can only point <strong>inward</strong>. Nothing in an inner circle can know anything about something in an outer circle."</p>
+          <div class="code-wrap" style="margin-top:12px;">
+            <div class="code-label">Layers (outer → inner)</div>
+<pre>Frameworks &amp; Drivers  (Spring, DB, Web, UI)
+        ↓ depends on
+Interface Adapters    (Controllers, Presenters, Gateways)
+        ↓ depends on
+Application/Use Cases  (Business rules specific to the app)
+        ↓ depends on
+Entities                (Enterprise-wide business rules)
+
+<span class="cm">// Entities know NOTHING about Spring, JPA, or HTTP.
+// Frameworks depend on the domain — never the other way around.</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">📦 Entities</div>
+          <p>Core business objects and rules, independent of any framework. E.g., an <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Order</code> class with validation logic that doesn't know about databases or HTTP.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">⚙️ Use Cases</div>
+          <p>Application-specific business rules — orchestrates entities to fulfill a specific operation, like "PlaceOrder" or "CancelSubscription".</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔌 Interface Adapters</div>
+          <p>Converts data between use cases and external formats — controllers, REST DTOs, repository implementations.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🖥️ Frameworks & Drivers</div>
+          <p>The outermost layer — Spring Boot, the database, web servers. Most volatile layer, easiest to swap out.</p>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">☕ Example in Java / Spring Boot</div>
+          <span class="badge badge-green">Practical</span>
+        </div>
+        <div class="task-body">
+          <div class="code-wrap">
+            <div class="code-label">Domain layer — no framework dependencies</div>
+<pre><span class="cm">// Entity — pure Java, no annotations</span>
+<span class="kw">public class</span> <span class="cls">Order</span> {
+    <span class="kw">private final</span> <span class="cls">String</span> id;
+    <span class="kw">private</span> <span class="cls">BigDecimal</span> total;
+
+    <span class="kw">public void</span> <span class="fn">applyDiscount</span>(<span class="cls">BigDecimal</span> percentage) {
+        <span class="kw">if</span> (percentage.compareTo(BigDecimal.ZERO) &lt; <span class="num">0</span>)
+            <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"Invalid discount"</span>);
+        <span class="kw">this</span>.total = total.subtract(total.multiply(percentage));
+    }
+}
+
+<span class="cm">// Use case — depends only on an interface (port), not the implementation</span>
+<span class="kw">public class</span> <span class="cls">PlaceOrderUseCase</span> {
+    <span class="kw">private final</span> <span class="cls">OrderRepository</span> repository; <span class="cm">// interface</span>
+
+    <span class="kw">public</span> <span class="fn">PlaceOrderUseCase</span>(<span class="cls">OrderRepository</span> repository) {
+        <span class="kw">this</span>.repository = repository;
+    }
+
+    <span class="kw">public void</span> <span class="fn">execute</span>(<span class="cls">Order</span> order) {
+        <span class="cm">// business logic here</span>
+        repository.save(order);
+    }
+}</pre>
+          </div>
+          <div class="code-wrap">
+            <div class="code-label">Infrastructure layer — implements the interface</div>
+<pre><span class="ann">@Repository</span>
+<span class="kw">public class</span> <span class="cls">JpaOrderRepository</span> <span class="kw">implements</span> <span class="cls">OrderRepository</span> {
+    <span class="ann">@Autowired</span> <span class="kw">private</span> <span class="cls">OrderJpaEntity</span> jpaRepo;
+
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">save</span>(<span class="cls">Order</span> order) {
+        <span class="cm">// maps domain Order to JPA entity and persists it</span>
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">✅ Benefits</div>
+          <ul class="checklist">
+            <li>Business logic testable without a database or web server</li>
+            <li>Swap frameworks/DB with minimal impact on core logic</li>
+            <li>Clear separation of concerns</li>
+            <li>Easier to onboard developers — logic isn't scattered across controllers</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">⚠️ Trade-offs</div>
+          <ul class="checklist">
+            <li>More boilerplate (interfaces, mappers between layers)</li>
+            <li>Overkill for small CRUD apps with little business logic</li>
+            <li>Requires team discipline to maintain the dependency rule</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">💡</span>
+        <div><strong>Senior answer:</strong> "Clean Architecture enforces the Dependency Rule — inner layers (entities, use cases) never depend on outer layers (frameworks, DB, UI). This is achieved through interfaces: the domain defines a port like OrderRepository, and infrastructure provides the implementation. It's essentially Dependency Inversion applied at an architectural level, and it overlaps heavily with Hexagonal Architecture and DDD — the goal is always to protect business logic from technical churn."</div>
+      </div>
+
+      <div class="alert alert-warn" style="margin-top:12px;">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Common mistake:</strong> Don't say "it's just using layers" or "it's the same as MVC" — Clean Architecture is specifically about the direction of dependencies, not just having folders named controller/service/repository.</div>
+      </div>
+    </div>
+
     <!-- SQS -->
     <div class="section" id="sqs">
       <div class="section-title"><span class="icon">📨</span> Amazon SQS</div>
@@ -898,6 +1244,400 @@
       </div>
     </div>
 
+    <!-- EVENT STREAMING VS SOURCING -->
+    <div class="section" id="eventing">
+      <div class="section-title"><span class="icon">🔄</span> Event Streaming vs Event Sourcing</div>
+
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div>Many developers confuse these two concepts. They're related but fundamentally different. <strong>Understand the distinction clearly.</strong></div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🎯 The Core Difference</div>
+          <span class="badge badge-orange">Critical Distinction</span>
+        </div>
+        <div class="task-body">
+          <p><strong>Recommended Answer:</strong></p>
+          <p>"<strong>Event Streaming</strong> is the continuous flow of events through a system in real-time, while <strong>Event Sourcing</strong> is a design pattern where the application state is reconstructed from a sequence of stored events."</p>
+          
+          <div class="grid2" style="margin-top:16px;">
+            <div style="background:rgba(88,166,255,.1); border:1px solid rgba(88,166,255,.3); border-radius:8px; padding:16px;">
+              <div style="font-weight:700; color:var(--blue); margin-bottom:8px;">Event Streaming</div>
+              <div style="color:var(--muted); font-size:.9rem;">Moving events → Transport & Processing</div>
+            </div>
+            <div style="background:rgba(248,152,32,.1); border:1px solid rgba(248,152,32,.3); border-radius:8px; padding:16px;">
+              <div style="font-weight:700; color:var(--java); margin-bottom:8px;">Event Sourcing</div>
+              <div style="color:var(--muted); font-size:.9rem;">Storing events → Source of Truth</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-box">
+          <div class="compare-header right">📡 Event Streaming</div>
+          <div style="padding:16px;">
+            <p style="color:var(--text); margin-bottom:12px;"><strong>What it is:</strong></p>
+            <p style="color:var(--muted); font-size:.9rem; margin-bottom:12px;">"An architecture where events are produced, transmitted, and consumed in real-time."</p>
+            
+            <p style="color:var(--text); margin-bottom:8px; margin-top:14px;"><strong>Characteristics:</strong></p>
+            <ul class="checklist">
+              <li>Events flow continuously through the system</li>
+              <li>Multiple consumers react to events in real-time</li>
+              <li>Events may or may not be stored permanently</li>
+              <li>Focus on <strong>transport and delivery</strong></li>
+            </ul>
+
+            <p style="color:var(--text); margin-top:14px; margin-bottom:8px;"><strong>Examples:</strong></p>
+            <ul class="checklist">
+              <li>Log aggregation (ELK stack)</li>
+              <li>Click stream analytics</li>
+              <li>Real-time notifications</li>
+              <li>IoT sensor data</li>
+            </ul>
+
+            <p style="color:var(--text); margin-top:14px; margin-bottom:8px;"><strong>Technologies:</strong></p>
+            <p style="color:var(--muted); font-size:.88rem;">Kafka, Kinesis, Pulsar, RabbitMQ Streams</p>
+          </div>
+        </div>
+
+        <div class="compare-box">
+          <div class="compare-header right">💾 Event Sourcing</div>
+          <div style="padding:16px;">
+            <p style="color:var(--text); margin-bottom:12px;"><strong>What it is:</strong></p>
+            <p style="color:var(--muted); font-size:.9rem; margin-bottom:12px;">"A pattern where instead of storing current state, you store all events that led to that state."</p>
+            
+            <p style="color:var(--text); margin-bottom:8px; margin-top:14px;"><strong>Characteristics:</strong></p>
+            <ul class="checklist">
+              <li>Events are the <strong>source of truth</strong></li>
+              <li>State is rebuilt by replaying events</li>
+              <li>Complete audit trail automatically</li>
+              <li>Focus on <strong>persistence and history</strong></li>
+            </ul>
+
+            <p style="color:var(--text); margin-top:14px; margin-bottom:8px;"><strong>Examples:</strong></p>
+            <ul class="checklist">
+              <li>Banking transactions</li>
+              <li>Order management systems</li>
+              <li>Version control (Git is event sourcing!)</li>
+              <li>Collaborative editing (Google Docs)</li>
+            </ul>
+
+            <p style="color:var(--text); margin-top:14px; margin-bottom:8px;"><strong>Technologies:</strong></p>
+            <p style="color:var(--muted); font-size:.88rem;">EventStore, Axon Framework, custom with Kafka/DB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box" style="margin-top:16px;">
+        <div class="task-header">
+          <div class="task-title">💡 Concrete Examples</div>
+          <span class="badge badge-green">Understand the Difference</span>
+        </div>
+        <div class="task-body">
+          <p><strong>Event Streaming Example:</strong></p>
+          <div class="code-wrap">
+            <div class="code-label">Real-time flow</div>
+<pre><span class="cm">// User clicks "Buy Now" button</span>
+User clicks → <span class="cls">Event</span> sent to Kafka → Multiple services react:
+  - <span class="cls">InventoryService</span>: reduces stock
+  - <span class="cls">NotificationService</span>: sends email
+  - <span class="cls">AnalyticsService</span>: tracks conversion
+  - <span class="cls">RecommendationService</span>: updates ML model
+
+<span class="cm">// Events flow through the system, consumed in real-time</span>
+<span class="cm">// Not necessarily stored as the source of truth</span></pre>
+          </div>
+
+          <p style="margin-top:16px;"><strong>Event Sourcing Example:</strong></p>
+          <div class="code-wrap">
+            <div class="code-label">State reconstruction</div>
+<pre><span class="cm">// Bank account - DON'T store balance directly</span>
+<span class="cm">// INSTEAD, store events:</span>
+
+<span class="cls">Event</span> 1: <span class="cls">AccountOpened</span>(accountId: <span class="str">"123"</span>, initialBalance: <span class="num">0</span>)
+<span class="cls">Event</span> 2: <span class="cls">MoneyDeposited</span>(accountId: <span class="str">"123"</span>, amount: <span class="num">100</span>)
+<span class="cls">Event</span> 3: <span class="cls">MoneyWithdrawn</span>(accountId: <span class="str">"123"</span>, amount: <span class="num">30</span>)
+<span class="cls">Event</span> 4: <span class="cls">MoneyDeposited</span>(accountId: <span class="str">"123"</span>, amount: <span class="num">50</span>)
+
+<span class="cm">// Current balance = replay all events: 0 + 100 - 30 + 50 = 120</span>
+<span class="cm">// You can rebuild ANY past state by replaying up to that point</span>
+<span class="cm">// Complete audit trail built-in!</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🔗 How They Work Together</div>
+          <span class="badge badge-blue">Senior Insight</span>
+        </div>
+        <div class="task-body">
+          <p>"Event Sourcing can use Event Streaming as the transport mechanism, but they're not the same thing."</p>
+          
+          <div class="code-wrap" style="margin-top:12px;">
+            <div class="code-label">Combined Architecture</div>
+<pre><span class="cm">// Event Sourcing: Store events as source of truth</span>
+<span class="kw">public class</span> <span class="cls">OrderAggregate</span> {
+    <span class="kw">private</span> <span class="cls">List</span>&lt;<span class="cls">Event</span>&gt; events = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
+    
+    <span class="kw">public void</span> <span class="fn">placeOrder</span>(<span class="cls">OrderPlacedEvent</span> event) {
+        events.<span class="fn">add</span>(event);  <span class="cm">// Store in event store (Event Sourcing)</span>
+        publisher.<span class="fn">publish</span>(event);  <span class="cm">// Also stream to Kafka (Event Streaming)</span>
+    }
+}
+
+<span class="cm">// Event Streaming: Other services consume in real-time</span>
+<span class="ann">@KafkaListener</span>(topics = <span class="str">"orders"</span>)
+<span class="kw">public void</span> <span class="fn">handleOrderPlaced</span>(<span class="cls">OrderPlacedEvent</span> event) {
+    <span class="cm">// React to event in real-time</span>
+    inventory.<span class="fn">reserve</span>(event.<span class="fn">getItems</span>());
+}</pre>
+          </div>
+
+          <div class="alert alert-success" style="margin-top:14px;">
+            <span class="alert-icon">🎯</span>
+            <div><strong>Senior answer:</strong> "In modern systems, we often use Event Sourcing for critical aggregates that need full audit trails, and publish those events via Event Streaming (like Kafka) so other services can react in real-time. The events serve dual purpose: source of truth AND communication mechanism."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-title">✅ When to Use Event Streaming</div>
+          <ul class="checklist">
+            <li>Real-time analytics and monitoring</li>
+            <li>Decoupling microservices</li>
+            <li>High-throughput data pipelines</li>
+            <li>Log aggregation</li>
+            <li>Notification systems</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ When to Use Event Sourcing</div>
+          <ul class="checklist">
+            <li>Financial systems (audit requirements)</li>
+            <li>Domain models with complex workflows</li>
+            <li>Need for temporal queries ("state at time X")</li>
+            <li>Debugging production issues (replay events)</li>
+            <li>Compliance and regulatory needs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert alert-warn" style="margin-top:16px;">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Common mistakes:</strong> Don't say "they're the same thing" or "Event Sourcing is just using Kafka". Event Streaming is about <em>transport</em>, Event Sourcing is about <em>persistence pattern</em>.</div>
+      </div>
+    </div>
+
+    <!-- ERROR HANDLING -->
+    <div class="section" id="errors">
+      <div class="section-title"><span class="icon">🚨</span> Error Handling in Consumers</div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">ℹ️</span>
+        <div>This is a <strong>critical production topic</strong>. Interviewers want to know you can build resilient systems that don't lose messages.</div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🎯 The Core Strategy</div>
+          <span class="badge badge-orange">Must Know</span>
+        </div>
+        <div class="task-body">
+          <p><strong>Recommended Answer:</strong></p>
+          <p>"Errors in a consumer are handled with retries, visibility timeout control, and fallback mechanisms like dead letter queues, ensuring messages aren't lost and are processed correctly."</p>
+        </div>
+      </div>
+
+      <div class="steps" style="margin-bottom:20px;">
+        <div class="step"><div class="step-num"></div><div class="step-body"><strong>Retry Logic</strong> <span>— If processing fails, the message isn't deleted and can be retried (automatic or manual with exponential backoff).</span></div></div>
+        <div class="step"><div class="step-num"></div><div class="step-body"><strong>Visibility Timeout</strong> <span>— While a consumer processes a message, it's hidden from other consumers. If the consumer fails, the message returns to the queue.</span></div></div>
+        <div class="step"><div class="step-num"></div><div class="step-body"><strong>Dead Letter Queue (DLQ)</strong> <span>— If a message fails repeatedly, send it to a DLQ for analysis to avoid infinite loops.</span></div></div>
+        <div class="step"><div class="step-num"></div><div class="step-body"><strong>Idempotency</strong> <span>— The consumer must be idempotent to handle duplicate messages safely.</span></div></div>
+        <div class="step"><div class="step-num"></div><div class="step-body"><strong>Observability</strong> <span>— Log errors and metrics to identify failures and bottlenecks quickly.</span></div></div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">♻️ Retry Strategies</div>
+          <span class="badge badge-blue">Implementation</span>
+        </div>
+        <div class="task-body">
+          <div class="code-wrap">
+            <div class="code-label">Java — Exponential Backoff Retry</div>
+<pre><span class="kw">public class</span> <span class="cls">MessageConsumer</span> {
+    <span class="kw">private static final int</span> MAX_RETRIES = <span class="num">3</span>;
+    <span class="kw">private static final long</span> BASE_DELAY = <span class="num">1000</span>; <span class="cm">// 1 second</span>
+    
+    <span class="kw">public void</span> <span class="fn">processMessage</span>(<span class="cls">Message</span> message) {
+        <span class="kw">int</span> attempt = <span class="num">0</span>;
+        
+        <span class="kw">while</span> (attempt &lt; MAX_RETRIES) {
+            <span class="kw">try</span> {
+                <span class="cm">// Process the message</span>
+                businessLogic.<span class="fn">process</span>(message);
+                
+                <span class="cm">// Success - delete message</span>
+                sqs.<span class="fn">deleteMessage</span>(message);
+                <span class="kw">return</span>;
+                
+            } <span class="kw">catch</span> (<span class="cls">TransientException</span> e) {
+                <span class="cm">// Temporary error - retry with backoff</span>
+                attempt++;
+                <span class="kw">long</span> delay = BASE_DELAY * (<span class="kw">long</span>) <span class="cls">Math</span>.<span class="fn">pow</span>(<span class="num">2</span>, attempt);
+                <span class="cls">Thread</span>.<span class="fn">sleep</span>(delay);
+                
+            } <span class="kw">catch</span> (<span class="cls">PermanentException</span> e) {
+                <span class="cm">// Permanent error - send to DLQ immediately</span>
+                logger.<span class="fn">error</span>(<span class="str">"Permanent error, sending to DLQ"</span>, e);
+                dlq.<span class="fn">send</span>(message);
+                sqs.<span class="fn">deleteMessage</span>(message);
+                <span class="kw">return</span>;
+            }
+        }
+        
+        <span class="cm">// Max retries exceeded - send to DLQ</span>
+        logger.<span class="fn">warn</span>(<span class="str">"Max retries exceeded for message: {}"</span>, message);
+        dlq.<span class="fn">send</span>(message);
+        sqs.<span class="fn">deleteMessage</span>(message);
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🔄 Idempotency Pattern</div>
+          <span class="badge badge-green">Production Essential</span>
+        </div>
+        <div class="task-body">
+          <p>"Processing the same message multiple times should not break the system or create duplicate effects."</p>
+          
+          <div class="code-wrap" style="margin-top:12px;">
+            <div class="code-label">Java — Idempotent Consumer</div>
+<pre><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="cls">PaymentProcessor</span> {
+    <span class="ann">@Autowired</span> <span class="kw">private</span> <span class="cls">PaymentRepository</span> paymentRepo;
+    
+    <span class="kw">public void</span> <span class="fn">processPayment</span>(<span class="cls">PaymentEvent</span> event) {
+        <span class="cls">String</span> idempotencyKey = event.<span class="fn">getPaymentId</span>();
+        
+        <span class="cm">// Check if already processed (idempotency check)</span>
+        <span class="kw">if</span> (paymentRepo.<span class="fn">existsByIdempotencyKey</span>(idempotencyKey)) {
+            logger.<span class="fn">info</span>(<span class="str">"Payment already processed: {}"</span>, idempotencyKey);
+            <span class="kw">return</span>; <span class="cm">// Safe to ignore - already done</span>
+        }
+        
+        <span class="cm">// Process payment</span>
+        <span class="cls">Payment</span> payment = <span class="kw">new</span> <span class="cls">Payment</span>();
+        payment.<span class="fn">setIdempotencyKey</span>(idempotencyKey);
+        payment.<span class="fn">setAmount</span>(event.<span class="fn">getAmount</span>());
+        payment.<span class="fn">setStatus</span>(<span class="str">"COMPLETED"</span>);
+        
+        <span class="cm">// Save atomically</span>
+        paymentRepo.<span class="fn">save</span>(payment);
+        
+        logger.<span class="fn">info</span>(<span class="str">"Payment processed successfully: {}"</span>, idempotencyKey);
+    }
+}</pre>
+          </div>
+
+          <div class="alert alert-success" style="margin-top:12px;">
+            <span class="alert-icon">💡</span>
+            <div><strong>Key insight:</strong> "Use a unique ID from the message (like requestId or transactionId) to track which messages have been processed. Store this in your database with the business entity."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-title">⚡ Transient vs Permanent Errors</div>
+          <p style="margin-bottom:10px;"><strong>Transient (retry):</strong></p>
+          <ul class="checklist">
+            <li>Network timeout</li>
+            <li>Database temporarily unavailable</li>
+            <li>Rate limit exceeded</li>
+            <li>Service temporarily overloaded</li>
+          </ul>
+          <p style="margin-top:12px; margin-bottom:10px;"><strong>Permanent (DLQ immediately):</strong></p>
+          <ul class="checklist">
+            <li>Invalid message format</li>
+            <li>Business rule violation</li>
+            <li>Authentication failure</li>
+            <li>Data not found (and won't exist)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">🛡️ Circuit Breaker Pattern</div>
+          <p>For cascading failures, implement circuit breaker to prevent overwhelming downstream services.</p>
+          <div class="code-wrap" style="margin-top:10px;">
+<pre><span class="cm">// Using Resilience4j</span>
+<span class="ann">@CircuitBreaker</span>(name = <span class="str">"payment"</span>)
+<span class="kw">public void</span> <span class="fn">callPaymentAPI</span>() {
+    <span class="cm">// If this fails repeatedly,</span>
+    <span class="cm">// circuit opens and fails fast</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-box" style="margin-top:16px;">
+        <div class="task-header">
+          <div class="task-title">📊 Monitoring & Observability</div>
+          <span class="badge badge-yellow">Production Ready</span>
+        </div>
+        <div class="task-body">
+          <p><strong>Key Metrics to Track:</strong></p>
+          <table style="margin-top:10px;">
+            <tr><th>Metric</th><th>What it tells you</th><th>Alert threshold</th></tr>
+            <tr><td>Message processing time</td><td>Performance degradation</td><td>p99 &gt; 5s</td></tr>
+            <tr><td>Error rate</td><td>System health</td><td>&gt; 5%</td></tr>
+            <tr><td>DLQ size</td><td>Messages failing permanently</td><td>&gt; 100 messages</td></tr>
+            <tr><td>Retry count</td><td>Transient issues frequency</td><td>Increasing trend</td></tr>
+            <tr><td>Consumer lag</td><td>Throughput problems</td><td>&gt; 1000 messages behind</td></tr>
+          </table>
+
+          <div class="code-wrap" style="margin-top:14px;">
+            <div class="code-label">Java — Logging Best Practice</div>
+<pre><span class="kw">public void</span> <span class="fn">processMessage</span>(<span class="cls">Message</span> msg) {
+    <span class="cls">String</span> messageId = msg.<span class="fn">getMessageId</span>();
+    <span class="cls">MDC</span>.<span class="fn">put</span>(<span class="str">"messageId"</span>, messageId); <span class="cm">// Correlation ID</span>
+    
+    <span class="kw">try</span> {
+        logger.<span class="fn">info</span>(<span class="str">"Processing message"</span>);
+        businessLogic.<span class="fn">process</span>(msg);
+        
+        <span class="cm">// Metrics</span>
+        metrics.<span class="fn">incrementCounter</span>(<span class="str">"messages.processed.success"</span>);
+        
+    } <span class="kw">catch</span> (<span class="cls">Exception</span> e) {
+        logger.<span class="fn">error</span>(<span class="str">"Failed to process message"</span>, e);
+        metrics.<span class="fn">incrementCounter</span>(<span class="str">"messages.processed.error"</span>);
+        <span class="kw">throw</span> e;
+    } <span class="kw">finally</span> {
+        <span class="cls">MDC</span>.<span class="fn">clear</span>();
+    }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-warn" style="margin-top:16px;">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Common mistakes to avoid:</strong> Never say "if it fails the message is lost" or "I just use try-catch and that's it". Show you understand resilience patterns.</div>
+      </div>
+
+      <div class="alert alert-success" style="margin-top:12px;">
+        <span class="alert-icon">🎯</span>
+        <div><strong>Senior-level answer:</strong> "Error handling requires distinguishing transient from permanent failures, implementing retries with exponential backoff, ensuring idempotency, using DLQs for poison messages, circuit breakers for cascading failures, and comprehensive observability to detect issues early. The goal is zero message loss and predictable behavior under failure conditions."</div>
+      </div>
+    </div>
+
     <!-- LOAD TESTING -->
     <div class="section" id="loadtest">
       <div class="section-title"><span class="icon">🔥</span> Load Testing</div>
@@ -1019,7 +1759,7 @@
   }
 
   // Highlight active section on scroll
-  const sections = ['intro','whyjava','jvm','rest','microservices','ddd','linkedlist','cycles','sqs','kafka','loadtest','tips'];
+  const sections = ['intro','whyjava','jvm','rest','microservices','ddd','linkedlist','cycles','generics','deadlocks','cleanarch','sqs','kafka','eventing','errors','loadtest','tips'];
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
