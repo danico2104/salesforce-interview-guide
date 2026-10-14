@@ -219,6 +219,8 @@
     <a class="nav-link" onclick="scrollTo('generics')"><div class="dot"></div> Generics</a>
     <a class="nav-link" onclick="scrollTo('deadlocks')"><div class="dot"></div> Deadlocks</a>
     <a class="nav-link" onclick="scrollTo('cleanarch')"><div class="dot"></div> Clean Architecture</a>
+    <a class="nav-link" onclick="scrollTo('hashmap')"><div class="dot"></div> HashMap Internals</a>
+    <a class="nav-link" onclick="scrollTo('exceptions')"><div class="dot"></div> Exception Hierarchy</a>
 
     <div class="nav-section">Cloud & Messaging</div>
     <a class="nav-link" onclick="scrollTo('sqs')"><div class="dot"></div> Amazon SQS</a>
@@ -1095,6 +1097,262 @@ Entities                (Enterprise-wide business rules)
       </div>
     </div>
 
+    <!-- HASHMAP -->
+    <div class="section" id="hashmap">
+      <div class="section-title"><span class="icon">🗂️</span> How HashMap Is Implemented Internally</div>
+
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div>This is a classic <strong>low-level question</strong> used to filter candidates who only know the API vs. those who understand what's happening underneath. Be ready to go deep.</div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">💡 Recommended Answer (High Level)</div>
+          <span class="badge badge-orange">Start Here</span>
+        </div>
+        <div class="task-body">
+          <p>"Internally, a HashMap is backed by an <strong>array of buckets</strong> (an array of <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Node&lt;K,V&gt;</code>). Each key's <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">hashCode()</code> is used to compute an index into that array. Entries that land in the same bucket (a collision) are chained together — as a linked list, or as a red-black tree once the chain gets long enough."</p>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🧩 The Node Structure</div>
+          <span class="badge badge-blue">Internal Data Structure</span>
+        </div>
+        <div class="task-body">
+          <div class="code-wrap">
+            <div class="code-label">Simplified internal structure (java.util.HashMap)</div>
+<pre><span class="kw">static class</span> <span class="cls">Node</span>&lt;K,V&gt; <span class="kw">implements</span> <span class="cls">Map</span>.Entry&lt;K,V&gt; {
+    <span class="kw">final int</span> hash;
+    <span class="kw">final</span> K key;
+    V value;
+    <span class="cls">Node</span>&lt;K,V&gt; next; <span class="cm">// forms a linked list within a bucket</span>
+}
+
+<span class="cls">Node</span>&lt;K,V&gt;[] table; <span class="cm">// the actual array of buckets</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Hashing the key</strong>
+            <span>— HashMap calls <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">key.hashCode()</code> and then applies its own spreading function to reduce collisions from poorly-written hashCode implementations.</span>
+            <div class="code-wrap" style="margin-top:10px;">
+              <div class="code-label">Hash spreading (simplified)</div>
+<pre><span class="kw">static final int</span> <span class="fn">hash</span>(<span class="cls">Object</span> key) {
+    <span class="kw">int</span> h;
+    <span class="kw">return</span> (key == <span class="kw">null</span>) ? <span class="num">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="num">16</span>);
+}
+<span class="cm">// XORs the high bits into the low bits so that differences 
+// in high-order bits still affect the final bucket index</span></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Computing the bucket index</strong>
+            <span>— The hash is reduced to an array index using <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">(n - 1) & hash</code>, where n is the table length (always a power of 2). This is equivalent to <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">hash % n</code> but much faster via bitwise AND.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Handling collisions</strong>
+            <span>— If two keys map to the same bucket, the new entry is appended to the bucket's linked list. <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">equals()</code> is used to check if a key already exists (to update vs. insert).</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Treeification (Java 8+)</strong>
+            <span>— If a single bucket's chain grows to <strong>8 or more nodes</strong> (and the table has at least 64 buckets), that bucket converts from a linked list to a <strong>red-black tree</strong>, turning worst-case lookup from O(n) to O(log n). It converts back to a list if it shrinks to 6 entries.</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-body">
+            <strong>Resizing</strong>
+            <span>— When the number of entries exceeds <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">capacity × loadFactor</code> (default load factor is 0.75), the table doubles in size and all entries are rehashed into the new, larger array.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-title">⏱️ Time Complexity</div>
+          <table style="margin-top:6px;">
+            <tr><th>Operation</th><th>Average</th><th>Worst case</th></tr>
+            <tr><td>get / put</td><td>O(1)</td><td>O(log n) <span style="color:var(--muted);">(treeified)</span></td></tr>
+            <tr><td>Before Java 8</td><td>O(1)</td><td>O(n) <span style="color:var(--muted);">(plain list)</span></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">🔑 Why hashCode() + equals() Matter</div>
+          <p>If you override one without the other on a key class, you get bugs: duplicate "equal" keys landing in different buckets, or lookups silently failing. Both must be consistent — equal objects <strong>must</strong> produce the same hashCode.</p>
+        </div>
+      </div>
+
+      <div class="code-wrap" style="margin-top:12px;">
+        <div class="code-label">Correct hashCode/equals pair</div>
+<pre><span class="kw">public class</span> <span class="cls">UserId</span> {
+    <span class="kw">private final</span> <span class="cls">String</span> value;
+
+    <span class="ann">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="cls">Object</span> o) {
+        <span class="kw">if</span> (<span class="kw">this</span> == o) <span class="kw">return true</span>;
+        <span class="kw">if</span> (!(o <span class="kw">instanceof</span> <span class="cls">UserId</span>)) <span class="kw">return false</span>;
+        <span class="kw">return</span> value.equals(((<span class="cls">UserId</span>) o).value);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public int</span> <span class="fn">hashCode</span>() {
+        <span class="kw">return</span> value.hashCode(); <span class="cm">// must be consistent with equals()</span>
+    }
+}</pre>
+      </div>
+
+      <div class="task-box" style="margin-top:16px;">
+        <div class="task-header">
+          <div class="task-title">🧵 Is HashMap Thread-Safe?</div>
+          <span class="badge badge-red">Follow-up Question</span>
+        </div>
+        <div class="task-body">
+          <p>"No. <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">HashMap</code> is not thread-safe — concurrent modification can corrupt internal structure or even cause an infinite loop during resize (pre-Java 8). For concurrent use, I use <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">ConcurrentHashMap</code>, which uses lock striping (segment/bucket-level locking) instead of locking the whole map, giving much better throughput under contention."</p>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">💡</span>
+        <div><strong>Senior answer:</strong> "HashMap uses an array of buckets indexed by a spread version of the key's hashCode. Collisions are chained as linked lists, which treeify into red-black trees past 8 entries per bucket for better worst-case performance. The table resizes and rehashes once it crosses capacity × load factor, which defaults to 0.75. It's not thread-safe, so I'd reach for ConcurrentHashMap in multi-threaded contexts."</div>
+      </div>
+    </div>
+
+    <!-- EXCEPTION HIERARCHY -->
+    <div class="section" id="exceptions">
+      <div class="section-title"><span class="icon">🌳</span> Exception Hierarchy</div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">💡 Recommended Answer</div>
+          <span class="badge badge-orange">Core Concept</span>
+        </div>
+        <div class="task-body">
+          <p>"In Java, everything throwable extends from <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Throwable</code>, which splits into two branches: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Error</code> for serious problems you normally shouldn't try to catch, and <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">Exception</code> for conditions an application might want to handle."</p>
+          
+          <div class="code-wrap" style="margin-top:14px;">
+            <div class="code-label">The Hierarchy</div>
+<pre>                    Throwable
+                   /          \
+               Error          Exception
+              /                /       \
+    OutOfMemoryError    RuntimeException   IOException, SQLException...
+    StackOverflowError    (unchecked)       (checked)
+                          /        \
+              NullPointerException  IllegalArgumentException
+              ArrayIndexOutOfBounds  ClassCastException
+              ArithmeticException    ...</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <div class="card-title" style="color:var(--red);">💀 Error</div>
+          <p>Serious problems the application shouldn't try to catch or recover from — usually JVM-level issues.</p>
+          <ul class="checklist" style="margin-top:8px;">
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">OutOfMemoryError</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">StackOverflowError</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">NoClassDefFoundError</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--yellow);">✅ Checked Exceptions</div>
+          <p>Must be declared with <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">throws</code> or caught — enforced at compile time. Represent recoverable conditions.</p>
+          <ul class="checklist" style="margin-top:8px;">
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">IOException</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">SQLException</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">ClassNotFoundException</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--blue);">⚡ Unchecked Exceptions</div>
+          <p>Extend <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">RuntimeException</code> — not enforced by the compiler. Usually represent programming errors.</p>
+          <ul class="checklist" style="margin-top:8px;">
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">NullPointerException</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">IllegalArgumentException</code></li>
+            <li><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">ArrayIndexOutOfBoundsException</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="task-box" style="margin-top:16px;">
+        <div class="task-header">
+          <div class="task-title">⚖️ Checked vs Unchecked — Why It Matters</div>
+          <span class="badge badge-blue">Common Follow-up</span>
+        </div>
+        <div class="task-body">
+          <div class="compare">
+            <div class="compare-box">
+              <div class="compare-header right">Checked</div>
+<pre><span class="kw">public void</span> <span class="fn">readFile</span>(<span class="cls">String</span> path) 
+        <span class="kw">throws</span> <span class="cls">IOException</span> {
+    <span class="cls">Files</span>.readAllBytes(Paths.get(path));
+}
+<span class="cm">// Caller is FORCED to handle or declare it</span></pre>
+            </div>
+            <div class="compare-box">
+              <div class="compare-header right">Unchecked</div>
+<pre><span class="kw">public void</span> <span class="fn">withdraw</span>(<span class="kw">double</span> amount) {
+    <span class="kw">if</span> (amount &lt; <span class="num">0</span>)
+        <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"Negative amount"</span>);
+}
+<span class="cm">// No obligation to declare or catch</span></pre>
+            </div>
+          </div>
+          <p style="margin-top:10px; color:var(--muted); font-size:.9rem;">"I use checked exceptions for recoverable, expected failure conditions (file not found, network timeout) where the caller should be forced to think about handling them. I use unchecked exceptions for programming errors or invariant violations that shouldn't normally be caught — they indicate a bug, not an expected condition."</p>
+        </div>
+      </div>
+
+      <div class="task-box">
+        <div class="task-header">
+          <div class="task-title">🛠️ Custom Exceptions</div>
+          <span class="badge badge-green">Design Practice</span>
+        </div>
+        <div class="task-body">
+          <div class="code-wrap">
+            <div class="code-label">Creating a domain-specific exception</div>
+<pre><span class="kw">public class</span> <span class="cls">InsufficientFundsException</span> <span class="kw">extends</span> <span class="cls">RuntimeException</span> {
+    <span class="kw">private final</span> <span class="cls">BigDecimal</span> shortfall;
+
+    <span class="kw">public</span> <span class="fn">InsufficientFundsException</span>(<span class="cls">String</span> message, <span class="cls">BigDecimal</span> shortfall) {
+        <span class="kw">super</span>(message);
+        <span class="kw">this</span>.shortfall = shortfall;
+    }
+
+    <span class="kw">public</span> <span class="cls">BigDecimal</span> <span class="fn">getShortfall</span>() { <span class="kw">return</span> shortfall; }
+}</pre>
+          </div>
+          <p style="margin-top:8px;">Extending <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">RuntimeException</code> keeps the exception unchecked — common practice in modern Java/Spring codebases to avoid verbose <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">throws</code> clauses everywhere.</p>
+        </div>
+      </div>
+
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Common mistake to avoid:</strong> Don't say "Exception and Error are the same" or "I always catch Exception generically" — catching broad types like <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;">Exception</code> or <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;">Throwable</code> hides bugs and should be avoided except at top-level boundary handlers (e.g. a global <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;">@ControllerAdvice</code> in Spring).</div>
+      </div>
+
+      <div class="alert alert-success" style="margin-top:12px;">
+        <span class="alert-icon">💡</span>
+        <div><strong>Senior answer:</strong> "Throwable is the root, splitting into Error for JVM-level failures I wouldn't try to recover from, and Exception for application-level conditions. Exception splits again into checked exceptions, enforced by the compiler for recoverable conditions like I/O failures, and RuntimeException for unchecked exceptions representing programming errors. I generally prefer unchecked exceptions for business rule violations in modern APIs, and reserve checked exceptions for truly recoverable external failures."</div>
+      </div>
+    </div>
+
     <!-- SQS -->
     <div class="section" id="sqs">
       <div class="section-title"><span class="icon">📨</span> Amazon SQS</div>
@@ -1759,7 +2017,7 @@ User clicks → <span class="cls">Event</span> sent to Kafka → Multiple servic
   }
 
   // Highlight active section on scroll
-  const sections = ['intro','whyjava','jvm','rest','microservices','ddd','linkedlist','cycles','generics','deadlocks','cleanarch','sqs','kafka','eventing','errors','loadtest','tips'];
+  const sections = ['intro','whyjava','jvm','rest','microservices','ddd','linkedlist','cycles','generics','deadlocks','cleanarch','hashmap','exceptions','sqs','kafka','eventing','errors','loadtest','tips'];
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -1771,6 +2029,36 @@ User clicks → <span class="cls">Event</span> sent to Kafka → Multiple servic
     });
   }, { threshold: 0.25 });
   sections.forEach(id => { const el = document.getElementById(id); if(el) observer.observe(el); });
+</script>
+<script>
+  /* Navegación robusta del aside: no depende de funciones globales ni de `event` */
+  (function () {
+    function targetOf(link) {
+      var m = (link.getAttribute('onclick') || '').match(/'([^']+)'/);
+      return m ? m[1] : null;
+    }
+
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest ? e.target.closest('.nav-link') : null;
+      if (!link) return;
+
+      var id = targetOf(link);
+      if (!id) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var el = document.getElementById(id);
+      if (!el) return;
+
+      document.querySelectorAll('.nav-link').forEach(function (l) {
+        l.classList.remove('active');
+      });
+      link.classList.add('active');
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, true);
+  })();
 </script>
 </body>
 </html>
