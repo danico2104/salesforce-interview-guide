@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce Developer – Interview Preparation</title>
+<style>
+  :root {
+    --bg: #04172E;
+    --surface: #0A2545;
+    --surface2: #0F2F57;
+    --border: #1F4778;
+    --sf: #00A1E0;
+    --sf2: #1B96FF;
+    --navy: #032D60;
+    --orange: #FF9E2C;
+    --green: #45C65A;
+    --red: #FE6B5B;
+    --yellow: #FFB75D;
+    --purple: #B58CFF;
+    --text: #EAF5FE;
+    --muted: #93AECB;
+    --code-bg: #031225;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7; overflow-x:hidden;
+  }
+  body::before {
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(0,161,224,.20), transparent 60%),
+      radial-gradient(700px 420px at -10% 110%, rgba(27,150,255,.13), transparent 60%);
+  }
+  a { color:var(--sf2); }
+  code {
+    font-family:'Cascadia Code','Fira Code',Consolas,monospace;
+    background:rgba(0,161,224,.14); color:#8fd8ff;
+    padding:1px 6px; border-radius:4px; font-size:.84em; word-break:break-word;
+  }
+
+  /* ───────── LAYOUT / SIDEBAR ───────── */
+  .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+  .sidebar {
+    width:272px; background:var(--surface); border-right:1px solid var(--border);
+    position:fixed; top:0; left:0; bottom:0; overflow-y:auto; z-index:100;
+    display:flex; flex-direction:column; transition:transform .3s ease;
+  }
+  .brand {
+    padding:20px 18px 16px; color:#fff; display:flex; align-items:center; gap:12px;
+    background:linear-gradient(135deg,var(--navy) 0%,#0176D3 60%,var(--sf) 100%);
+  }
+  .brand .t { font-size:1.15rem; font-weight:800; letter-spacing:-.3px; line-height:1.2; }
+  .brand .t small { display:block; font-weight:400; opacity:.85; font-size:.78rem; letter-spacing:0; }
+
+  /* Mascot slot (Trailhead) */
+  .mascot-slot {
+    width:52px; height:52px; border-radius:50%; flex-shrink:0; overflow:hidden;
+    background:rgba(255,255,255,.95); border:2px solid rgba(255,255,255,.6);
+    display:grid; place-items:center; font-size:1.6rem;
+  }
+  .mascot-slot img { width:100%; height:100%; object-fit:contain; display:none; }
+  .mascot-slot.has-img img { display:block; }
+  .mascot-slot.has-img .fallback { display:none; }
+  .hero-mascot {
+    width:150px; height:150px; font-size:4.2rem;
+    background:radial-gradient(circle at 35% 30%, #ffffff, #cfe9fe 70%);
+    border:4px solid rgba(0,161,224,.55);
+    box-shadow:0 12px 40px rgba(0,161,224,.35);
+    animation:floaty 4.5s ease-in-out infinite;
+  }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  .progress-box { margin:14px 16px 4px; padding:12px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; }
+  .p-top { display:flex; justify-content:space-between; align-items:center; font-size:.78rem; color:var(--muted); }
+  .p-top b { color:var(--orange); font-size:.82rem; }
+  .bar { height:8px; border-radius:99px; background:#0a2a4f; margin:8px 0 6px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--sf),var(--green)); transition:width .4s ease; }
+  .p-sub { font-size:.72rem; color:var(--muted); }
+
+  .nav-section { padding:14px 18px 4px; font-size:.68rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); font-weight:700; }
+  .nav-link {
+    display:flex; align-items:center; gap:10px; padding:8px 18px; color:var(--muted);
+    text-decoration:none; font-size:.88rem; border-left:3px solid transparent; transition:all .2s;
+  }
+  .nav-link .dot { width:7px; height:7px; border-radius:50%; background:#3b5c85; flex-shrink:0; transition:background .2s; }
+  .nav-link:hover, .nav-link.active { color:var(--text); background:rgba(0,161,224,.12); border-left-color:var(--sf); }
+  .nav-link:hover .dot, .nav-link.active .dot { background:var(--orange); }
+  .nav-link.seen .dot { background:var(--green); }
+  .nav-link.active.seen .dot { background:var(--orange); }
+  .sidebar-foot { margin-top:auto; padding:16px 18px 20px; font-size:.7rem; color:var(--muted); line-height:1.5; }
+
+  .menu-btn {
+    display:none; position:fixed; top:14px; right:14px; z-index:200;
+    width:48px; height:48px; border-radius:50%; border:0; cursor:pointer;
+    background:linear-gradient(135deg,var(--sf),var(--sf2)); color:#fff; font-size:1.4rem;
+    box-shadow:0 6px 18px rgba(0,161,224,.45); place-items:center;
+  }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:99; }
+  .overlay.show { display:block; }
+
+  /* ───────── MAIN ───────── */
+  .main { margin-left:272px; flex:1; min-width:0; padding:0 44px 70px; max-width:1180px; }
+
+  .hero {
+    padding:56px 0 32px; border-bottom:1px solid var(--border); margin-bottom:40px;
+    display:flex; gap:32px; align-items:center; justify-content:space-between;
+  }
+  .hero-text { flex:1; min-width:0; }
+  .badge-top {
+    display:inline-flex; align-items:center; gap:8px; padding:4px 14px; border-radius:20px;
+    background:rgba(0,161,224,.16); border:1px solid rgba(0,161,224,.4);
+    color:#6fd0ff; font-size:.8rem; font-weight:600; margin-bottom:18px;
+  }
+  .hero h1 { font-size:2.6rem; font-weight:800; letter-spacing:-1px; line-height:1.15; margin-bottom:14px; }
+  .hero h1 span { background:linear-gradient(90deg,var(--sf),#7fd6ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero p { color:var(--muted); font-size:1.05rem; max-width:680px; }
+  .tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+  .tag { background:var(--surface2); border:1px solid var(--border); color:var(--muted); padding:3px 12px; border-radius:20px; font-size:.78rem; }
+  .hero-actions { margin-top:22px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .hero-actions .hint { font-size:.8rem; color:var(--muted); max-width:340px; }
+  .btn {
+    background:linear-gradient(135deg,var(--sf),var(--sf2)); color:#fff; border:0; cursor:pointer;
+    padding:10px 18px; border-radius:999px; font-weight:700; font-size:.88rem; transition:transform .2s, filter .2s;
+  }
+  .btn:hover { transform:translateY(-1px); filter:brightness(1.08); }
+  .btn.on { background:linear-gradient(135deg,var(--orange),var(--red)); }
+
+  /* Sections */
+  .section { margin-bottom:60px; scroll-margin-top:20px; }
+  .section-title {
+    font-size:1.45rem; font-weight:700; margin-bottom:20px; padding-bottom:12px;
+    border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;
+  }
+  .sub-title { font-size:1.05rem; font-weight:700; margin:24px 0 12px; display:flex; align-items:center; gap:8px; }
+
+  .qbox {
+    background:linear-gradient(135deg,rgba(0,161,224,.14),rgba(27,150,255,.05));
+    border:1px solid rgba(0,161,224,.35); border-left:4px solid var(--sf);
+    border-radius:12px; padding:14px 20px; margin-bottom:18px;
+  }
+  .qlabel { font-size:.68rem; text-transform:uppercase; letter-spacing:1px; color:var(--sf); font-weight:700; margin-bottom:4px; }
+  .qbox p { font-weight:600; font-size:.97rem; }
+  .qbox ul { list-style:none; display:flex; flex-direction:column; gap:4px; margin-top:4px; }
+  .qbox li { font-weight:600; font-size:.94rem; display:flex; gap:8px; }
+  .qbox li::before { content:'❓'; flex-shrink:0; }
+
+  .zone-hint { display:none; font-size:.8rem; color:var(--orange); margin:-6px 0 10px; font-weight:600; }
+  body.practice .zone-hint { display:block; }
+  body.practice .answer-zone:not(.revealed) {
+    max-height:150px; overflow:hidden; filter:blur(7px); cursor:pointer; user-select:none; position:relative;
+  }
+  body.practice .answer-zone.revealed ~ * { }
+  .answer-zone { transition:filter .25s ease; }
+
+  /* Cards / boxes */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:16px; min-width:0; }
+  .card-title { font-weight:700; font-size:.98rem; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .card p { color:var(--muted); font-size:.9rem; line-height:1.6; }
+  .card p + p { margin-top:8px; }
+  .task-box { background:var(--surface2); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px; min-width:0; }
+  .task-header {
+    display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+    padding:13px 20px; background:rgba(0,161,224,.10); border-bottom:1px solid var(--border);
+  }
+  .task-title { font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:8px; }
+  .task-body { padding:18px 20px; }
+  .task-body p { color:var(--muted); font-size:.9rem; margin-bottom:10px; }
+  .task-body p:last-child { margin-bottom:0; }
+  .badge { padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:700; white-space:nowrap; }
+  .b-blue   { background:rgba(0,161,224,.2);  color:#7fd6ff; }
+  .b-orange { background:rgba(255,158,44,.18); color:var(--orange); }
+  .b-green  { background:rgba(69,198,90,.16);  color:var(--green); }
+  .b-red    { background:rgba(254,107,91,.16); color:var(--red); }
+  .b-purple { background:rgba(181,140,255,.16); color:var(--purple); }
+
+  .alert { border-radius:10px; padding:14px 18px; margin:16px 0; display:flex; gap:12px; font-size:.9rem; }
+  .alert > div { min-width:0; }
+  .alert-info    { background:rgba(0,161,224,.12);  border:1px solid rgba(0,161,224,.38);  color:#8fdcff; }
+  .alert-warn    { background:rgba(255,158,44,.11); border:1px solid rgba(255,158,44,.38); color:#ffc983; }
+  .alert-success { background:rgba(69,198,90,.10);  border:1px solid rgba(69,198,90,.35);  color:#7be08d; }
+  .alert-danger  { background:rgba(254,107,91,.10); border:1px solid rgba(254,107,91,.38); color:#ff9a8d; }
+  .alert-icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+
+  /* Code */
+  .code-wrap { position:relative; margin:12px 0; }
+  .code-label { position:absolute; top:9px; right:12px; font-size:.68rem; color:var(--muted); background:var(--surface2); padding:2px 8px; border-radius:4px; z-index:2; }
+  pre {
+    background:var(--code-bg); border:1px solid var(--border); border-radius:10px;
+    padding:18px 18px; overflow-x:auto; font-size:.82rem; line-height:1.6;
+    font-family:'Cascadia Code','Fira Code',Consolas,monospace; -webkit-overflow-scrolling:touch;
+  }
+  .code-wrap pre { padding-top:30px; }
+  .kw{color:#57B8FF}.fn{color:#FFB75D}.str{color:#7ED6A3}.num{color:#FF9E9E}.cm{color:#6B87A8;font-style:italic}.cls{color:#C9A7FF}.ann{color:#00D1B2}
+
+  /* Lists */
+  .checklist { list-style:none; display:flex; flex-direction:column; gap:7px; margin-top:8px; }
+  .checklist li { display:flex; gap:10px; font-size:.9rem; color:var(--muted); }
+  .checklist li::before { content:'✓'; color:var(--green); font-weight:700; flex-shrink:0; }
+  .crosslist { list-style:none; display:flex; flex-direction:column; gap:7px; margin-top:8px; }
+  .crosslist li { display:flex; gap:10px; font-size:.9rem; color:var(--muted); }
+  .crosslist li::before { content:'✗'; color:var(--red); font-weight:700; flex-shrink:0; }
+
+  .steps { display:flex; flex-direction:column; gap:12px; counter-reset:step; margin:10px 0; }
+  .step { display:flex; gap:14px; align-items:flex-start; counter-increment:step; }
+  .step::before {
+    content:counter(step); width:28px; height:28px; border-radius:50%; flex-shrink:0; margin-top:2px;
+    background:linear-gradient(135deg,var(--sf),var(--sf2)); color:#fff; font-size:.75rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-body { font-size:.9rem; min-width:0; }
+  .step-body strong { color:var(--text); }
+  .step-body span.d { color:var(--muted); }
+
+  /* Tables */
+  .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); border-radius:10px; margin:12px 0; }
+  table { width:100%; border-collapse:collapse; font-size:.86rem; min-width:540px; }
+  th { background:var(--surface2); color:var(--muted); font-weight:600; padding:10px 14px; text-align:left; border-bottom:2px solid var(--border); white-space:nowrap; }
+  td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:0; }
+  tr:hover td { background:rgba(0,161,224,.05); }
+
+  /* Grids */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .grid2 > .card, .grid3 > .card { margin-bottom:0; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+  .compare-box { border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:0; }
+  .compare-header { padding:8px 14px; font-size:.78rem; font-weight:700; letter-spacing:.4px; }
+  .compare-header.wrong { background:rgba(254,107,91,.16); color:var(--red); }
+  .compare-header.right { background:rgba(69,198,90,.16); color:var(--green); }
+  .compare-header.info  { background:rgba(0,161,224,.18); color:#7fd6ff; }
+  .compare-box pre { border:0; border-radius:0; border-top:1px solid var(--border); font-size:.78rem; }
+  .compare-box .pad { padding:14px 16px; background:var(--surface2); font-size:.88rem; color:var(--muted); }
+
+  /* Topic map chips */
+  .chips { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .chip {
+    display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:10px; text-decoration:none;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:.86rem; transition:all .2s;
+  }
+  .chip:hover { border-color:var(--sf); transform:translateY(-2px); background:var(--surface2); }
+  .chip b { width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,var(--sf),var(--sf2)); color:#fff; font-size:.72rem; display:grid; place-items:center; flex-shrink:0; }
+
+  /* Security layers */
+  .layer { border-left:4px solid var(--sf); background:var(--surface2); border-radius:8px; padding:12px 16px; margin-bottom:10px; }
+  .layer h4 { font-size:.92rem; margin-bottom:2px; }
+  .layer p { color:var(--muted); font-size:.86rem; }
+
+  details { background:var(--surface); border:1px solid var(--border); border-radius:10px; margin:10px 0; }
+  summary { cursor:pointer; padding:11px 16px; font-weight:600; font-size:.9rem; color:#8fdcff; }
+  details > div { padding:0 16px 14px; }
+
+  .foot { margin-top:50px; padding-top:20px; border-top:1px solid var(--border); font-size:.78rem; color:var(--muted); }
+
+  ::-webkit-scrollbar { width:7px; height:7px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+  /* ───────── RESPONSIVE ───────── */
+  @media (max-width:1100px) {
+    .main { padding:0 28px 60px; }
+    .hero h1 { font-size:2.2rem; }
+  }
+  @media (max-width:900px) {
+    .menu-btn { display:grid; }
+    .sidebar { transform:translateX(-100%); width:min(300px,86vw); box-shadow:6px 0 26px rgba(0,0,0,.5); }
+    .sidebar.open { transform:translateX(0); }
+    .main { margin-left:0; padding:0 22px 60px; }
+    .hero { padding-top:82px; flex-direction:column-reverse; align-items:flex-start; gap:18px; }
+    .hero-mascot { width:104px; height:104px; font-size:3rem; }
+    .grid3 { grid-template-columns:1fr 1fr; }
+    .grid2, .compare { grid-template-columns:1fr; }
+  }
+  @media (max-width:600px) {
+    .main { padding:0 16px 50px; }
+    .hero h1 { font-size:1.75rem; }
+    .hero p { font-size:.95rem; }
+    .section-title { font-size:1.2rem; }
+    .grid3 { grid-template-columns:1fr; }
+    .chips { grid-template-columns:1fr; }
+    .task-body, .card { padding:16px; }
+    pre { font-size:.74rem; padding:14px; }
+    .code-label { display:none; }
+    .code-wrap pre { padding-top:14px; }
+    .step { gap:10px; }
+  }
+  @media (max-width:380px) {
+    .hero h1 { font-size:1.5rem; }
+    .menu-btn { width:44px; height:44px; top:10px; right:10px; }
+    th, td { padding:8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ═════════ SIDEBAR ═════════ -->
+  <nav class="sidebar" id="sidebar" aria-label="Guide navigation">
+    <div class="brand">
+      <div class="mascot-slot" data-mascot><span class="fallback">☁️</span><img alt="Trailhead mascot"></div>
+      <div class="t">Entrevista<small>Salesforce Developer Track</small></div>
+    </div>
+
+    <div class="progress-box">
+      <div class="p-top"><span>🏕️ Trail progress</span><b id="rank">Scout</b></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="p-sub" id="pText">0 of 19 sections</div>
+    </div>
+
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="#intro" data-target="intro"><span class="dot"></span>Introduction</a>
+    <a class="nav-link" href="#overview" data-target="overview"><span class="dot"></span>Interview Map &amp; Format</a>
+
+    <div class="nav-section">Data Model &amp; Environments</div>
+    <a class="nav-link" href="#m2m" data-target="m2m"><span class="dot"></span>Many-to-Many Relationships</a>
+    <a class="nav-link" href="#envs" data-target="envs"><span class="dot"></span>Sandboxes vs Scratch Orgs</a>
+
+    <div class="nav-section">Apex &amp; Automation</div>
+    <a class="nav-link" href="#tbest" data-target="tbest"><span class="dot"></span>Trigger Best Practices</a>
+    <a class="nav-link" href="#onetrigger" data-target="onetrigger"><span class="dot"></span>One Trigger &amp; Handlers</a>
+    <a class="nav-link" href="#tcallout" data-target="tcallout"><span class="dot"></span>API Request from a Trigger</a>
+    <a class="nav-link" href="#valrules" data-target="valrules"><span class="dot"></span>Validation Rules</a>
+    <a class="nav-link" href="#dml" data-target="dml"><span class="dot"></span>insert vs Database.insert</a>
+
+    <div class="nav-section">Integration &amp; Events</div>
+    <a class="nav-link" href="#capps" data-target="capps"><span class="dot"></span>Connected App vs Named Cred.</a>
+    <a class="nav-link" href="#platev" data-target="platev"><span class="dot"></span>Platform Events</a>
+
+    <div class="nav-section">SOQL &amp; Security</div>
+    <a class="nav-link" href="#soqlparents" data-target="soqlparents"><span class="dot"></span>Parent Relationship Levels</a>
+    <a class="nav-link" href="#secmodel" data-target="secmodel"><span class="dot"></span>Record vs Field Security</a>
+    <a class="nav-link" href="#fls" data-target="fls"><span class="dot"></span>Query Without Field Access</a>
+
+    <div class="nav-section">Live Coding (Teams chat)</div>
+    <a class="nav-link" href="#ex1" data-target="ex1"><span class="dot"></span>SOQL: Accounts + Contacts</a>
+    <a class="nav-link" href="#ex2" data-target="ex2"><span class="dot"></span>SOQL: Most Common Value</a>
+
+    <div class="nav-section">DevOps</div>
+    <a class="nav-link" href="#git" data-target="git"><span class="dot"></span>Git Pull vs Git Fetch</a>
+
+    <div class="nav-section">Wrap-up</div>
+    <a class="nav-link" href="#cheat" data-target="cheat"><span class="dot"></span>Quick-Fire Cheat Sheet</a>
+    <a class="nav-link" href="#tips" data-target="tips"><span class="dot"></span>Interview Tips</a>
+
+    <div class="sidebar-foot">Independent study guide. Salesforce, Trailhead and related mascots are trademarks of Salesforce, Inc.</div>
+  </nav>
+
+  <!-- ═════════ MAIN ═════════ -->
+  <main class="main">
+
+    <!-- HERO -->
+    <header class="hero" id="intro">
+      <div class="hero-text">
+        <div class="badge-top">☁️ Salesforce Developer</div>
+        <h1><span>Salesforce Developer</span> Interview Guide</h1>
+        <p>Everything you need for the technical interview: data modeling, environments, Apex triggers, integrations, SOQL, the security model, platform events, Git — plus the live SOQL round you will type into a Teams chat.</p>
+        <div class="tags">
+          <span class="tag">⚡ Apex</span>
+          <span class="tag">🔎 SOQL</span>
+          <span class="tag">🔁 Triggers</span>
+          <span class="tag">🔐 Security</span>
+          <span class="tag">📡 Platform Events</span>
+          <span class="tag">🧪 Scratch Orgs</span>
+        </div>
+        <div class="hero-actions">
+          <button class="btn" id="practiceBtn" type="button">🎯 Practice mode: OFF</button>
+          <span class="hint">Blurs every answer so you can respond out loud first — click a blurred block to reveal it.</span>
+        </div>
+      </div>
+      <div class="mascot-slot hero-mascot" data-mascot title="Trailhead mascot slot"><span class="fallback">☁️</span><img alt="Trailhead mascot"></div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="section" id="overview">
+      <h2 class="section-title"><span>🗺️</span> Interview Map &amp; Format</h2>
+
+      <div class="alert alert-info"><span class="alert-icon">ℹ️</span>
+        <div>The interview mixes <strong>conceptual questions</strong> (data model, Apex, security, integrations) with a <strong>live coding round where you type SOQL into a Teams chat</strong> — no IDE, no autocomplete, no execution. You must know the syntax by heart and explain your reasoning out loud.</div>
+      </div>
+
+      <div class="sub-title">📌 Topics you will be asked about (click to jump)</div>
+      <div class="chips">
+        <a class="chip" href="#m2m" data-target="m2m"><b>1</b>Many-to-many relationships</a>
+        <a class="chip" href="#envs" data-target="envs"><b>2</b>Sandboxes vs scratch orgs</a>
+        <a class="chip" href="#tbest" data-target="tbest"><b>3</b>Trigger best practices</a>
+        <a class="chip" href="#onetrigger" data-target="onetrigger"><b>4</b>One trigger per object / handlers</a>
+        <a class="chip" href="#tcallout" data-target="tcallout"><b>5</b>API request from a trigger</a>
+        <a class="chip" href="#valrules" data-target="valrules"><b>6</b>Validation rules</a>
+        <a class="chip" href="#capps" data-target="capps"><b>7</b>Connected app vs named credential</a>
+        <a class="chip" href="#soqlparents" data-target="soqlparents"><b>8</b>Parent levels in a query</a>
+        <a class="chip" href="#secmodel" data-target="secmodel"><b>9</b>Record vs field security</a>
+        <a class="chip" href="#dml" data-target="dml"><b>10</b>insert vs Database.insert</a>
+        <a class="chip" href="#git" data-target="git"><b>11</b>Git pull vs fetch</a>
+        <a class="chip" href="#platev" data-target="platev"><b>12</b>Platform events</a>
+        <a class="chip" href="#fls" data-target="fls"><b>13</b>Query fields the user can't see</a>
+        <a class="chip" href="#ex1" data-target="ex1"><b>14</b>Live SOQL (2 exercises)</a>
+      </div>
+
+      <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
+        <div><strong>About the live exercises:</strong> the worked examples in this guide teach the <em>patterns</em> behind those tasks (parent + children filtered by a related object, and an aggregate "most common value") using different objects, fields and thresholds. Learn the pattern, then adapt it to whatever you are asked.</div>
+      </div>
+    </section>
+
+    <!-- M2M -->
+    <section class="section" id="m2m">
+      <h2 class="section-title"><span>🔗</span> Many-to-Many Relationships</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>How do you create many-to-many relationships in Salesforce?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"Salesforce has no native many-to-many field. You model it with a <strong>junction object</strong> that has <strong>two Master-Detail relationships</strong>, one to each parent. Every junction record links one record from each side, so a record on either side can relate to many on the other through many junction records."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Data model</div>
+<pre>Position__c  1 ───&lt;  Job_Application__c  &gt;─── 1  Candidate__c
+ (master #1, primary)     (junction object)      (master #2, secondary)</pre></div>
+
+        <div class="sub-title">🛠️ Steps</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Create the junction object</strong> <span class="d">— e.g. <code>Job_Application__c</code>, named after the real-world thing that connects both sides.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Create the first Master-Detail field</strong> <span class="d">— to <code>Position__c</code>. This is the <em>primary</em> master: the junction inherits its Owner/Division behaviour from it.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Create the second Master-Detail field</strong> <span class="d">— to <code>Candidate__c</code> (the <em>secondary</em> master).</span></div></div>
+          <div class="step"><div class="step-body"><strong>Expose it</strong> <span class="d">— add the related list to both parent page layouts; optionally add roll-up summary fields on either parent.</span></div></div>
+        </div>
+
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Why Master-Detail on both sides</div>
+            <ul class="checklist">
+              <li>Roll-up summary fields on both parents</li>
+              <li>Deleting either parent cascades to the junction records</li>
+              <li>Junction inherits sharing from its masters (no Owner field)</li>
+              <li>An object can have <strong>at most 2</strong> Master-Detail relationships</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--orange);">⚖️ When to use Lookups instead</div>
+            <ul class="checklist">
+              <li>Records must live independently of each other</li>
+              <li>Relationship is optional (Master-Detail is required)</li>
+              <li>Trade-off: no native roll-up summaries, no cascade delete</li>
+            </ul>
+            <p style="margin-top:8px;">Standard examples: <code>CampaignMember</code>, <code>OpportunityContactRole</code>.</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">SOQL through the junction</div>
+<pre><span class="cm">-- Child → parent: who applied to what?</span>
+<span class="kw">SELECT</span> Id, Position__r.Name, Candidate__r.Name
+<span class="kw">FROM</span>   Job_Application__c
+
+<span class="cm">-- Parent → child: a position with all its candidates</span>
+<span class="kw">SELECT</span> Name, (<span class="kw">SELECT</span> Candidate__r.Name <span class="kw">FROM</span> Job_Applications__r)
+<span class="kw">FROM</span>   Position__c</pre></div>
+      </div>
+    </section>
+
+    <!-- ENVS -->
+    <section class="section" id="envs">
+      <h2 class="section-title"><span>🧪</span> Sandboxes vs Scratch Orgs</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul><li>What is the difference between sandboxes and scratch orgs?</li><li>Do you know the different types of sandboxes?</li></ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"A <strong>sandbox</strong> is a persistent copy of a production org (metadata, and depending on the type, data). A <strong>scratch org</strong> is a temporary, disposable org created from a configuration file and populated from source control through a Dev Hub — it supports a <strong>source-driven</strong> workflow where Git, not the org, is the source of truth."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Aspect</th><th>Sandbox</th><th>Scratch Org</th></tr>
+          <tr><td><strong>Created from</strong></td><td>A copy of production</td><td>A definition file (<code>project-scratch-def.json</code>)</td></tr>
+          <tr><td><strong>Lifespan</strong></td><td>Persistent until deleted/refreshed</td><td>Temporary: 1–30 days (default 7)</td></tr>
+          <tr><td><strong>Data</strong></td><td>Depends on type (none → full copy)</td><td>Empty — you load test data</td></tr>
+          <tr><td><strong>Created via</strong></td><td>Setup UI, API or CLI (can take hours)</td><td>Salesforce CLI (minutes)</td></tr>
+          <tr><td><strong>Source of truth</strong></td><td>Often the org itself</td><td>Version control (Git)</td></tr>
+          <tr><td><strong>Requires</strong></td><td>Production org with sandbox licences</td><td>Dev Hub enabled</td></tr>
+          <tr><td><strong>Best for</strong></td><td>UAT, integration testing, staging, training</td><td>Feature work, CI pipelines, packaging, throw-away tests</td></tr>
+        </table></div>
+
+        <div class="sub-title">🗂️ Types of sandboxes</div>
+        <div class="table-wrap"><table>
+          <tr><th>Type</th><th>What it contains</th><th>Storage</th><th>Refresh</th><th>Typical use</th></tr>
+          <tr><td><strong>Developer</strong></td><td>Metadata only</td><td>200 MB data + 200 MB files</td><td>1 day</td><td>Day-to-day development and unit testing</td></tr>
+          <tr><td><strong>Developer Pro</strong></td><td>Metadata only</td><td>1 GB data + 1 GB files</td><td>1 day</td><td>Bigger datasets, integration testing, training</td></tr>
+          <tr><td><strong>Partial Copy</strong></td><td>Metadata + a data sample defined by a <em>sandbox template</em></td><td>5 GB data</td><td>5 days</td><td>QA, UAT with representative data</td></tr>
+          <tr><td><strong>Full</strong></td><td>Metadata + all production data (a template can narrow it)</td><td>Same as production</td><td>29 days</td><td>Staging, performance and load testing, final UAT</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🧰 Scratch org workflow</div>
+<pre><span class="cm"># 1. Create it (default lifespan: 7 days)</span>
+sf org create scratch \
+  --definition-file config/project-scratch-def.json \
+  --alias feature-x --duration-days 7 --set-default
+
+<span class="cm"># 2. Deploy the source tracked in Git</span>
+sf project deploy start
+
+<span class="cm"># 3. Work, pull changes back, then throw it away</span>
+sf org open
+sf project retrieve start
+sf org delete scratch --target-org feature-x</pre>
+          </div>
+          <div class="card">
+            <div class="card-title">📄 Definition file &amp; post-copy script</div>
+<pre>{
+  "orgName": "Entrevista Dev Scratch",
+  "edition": "Developer",
+  "features": [],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    }
+  }
+}</pre>
+            <p style="margin-top:8px;">After a sandbox is created or refreshed, an Apex class that implements <code>SandboxPostCopy</code> can mask data or switch off integrations automatically.</p>
+          </div>
+        </div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "I use scratch orgs for feature development and CI because they are disposable and built from Git, and sandboxes for UAT and integration testing — Developer/Developer Pro for development, Partial Copy for QA with sample data, Full for staging and performance tests with production-sized data."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRIGGER BEST PRACTICES -->
+    <section class="section" id="tbest">
+      <h2 class="section-title"><span>⚡</span> Trigger Best Practices</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>Describe best practices to work with triggers.</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="grid2">
+          <div class="card"><div class="card-title">🧱 1. Logic-less triggers</div><p>The trigger only routes events to a handler class. Business logic lives in classes you can test and reuse.</p></div>
+          <div class="card"><div class="card-title">📦 2. Bulkify everything</div><p>A trigger receives up to 200 records per chunk. Work with collections (<code>Set</code>, <code>Map</code>, <code>List</code>), never one record at a time.</p></div>
+          <div class="card"><div class="card-title">🚫 3. No SOQL or DML in loops</div><p>Query once before the loop (<code>WHERE Id IN :ids</code>) and do one DML after it. This is the #1 cause of governor-limit failures.</p></div>
+          <div class="card"><div class="card-title">🎯 4. Pick the right context</div><p><strong>Before</strong>: change the same record's fields (no extra DML). <strong>After</strong>: need the record Id or must touch related records.</p></div>
+          <div class="card"><div class="card-title">♻️ 5. Prevent recursion</div><p>Guard re-entry with a static <code>Set&lt;Id&gt;</code> of processed records, or only act when a field actually changed (compare <code>Trigger.oldMap</code>).</p></div>
+          <div class="card"><div class="card-title">🔑 6. No hard-coded Ids</div><p>Use Custom Metadata, Custom Labels or describe calls (e.g. record type by developer name).</p></div>
+          <div class="card"><div class="card-title">⏱️ 7. Async for slow work</div><p>Callouts and heavy processing go to Queueable/Future/Platform Events — never inline in the trigger.</p></div>
+          <div class="card"><div class="card-title">🔌 8. Bypass switch</div><p>A Custom Metadata or Custom Permission flag lets admins skip triggers during data loads and migrations.</p></div>
+          <div class="card"><div class="card-title">🧪 9. Test in bulk</div><p>Test with 200+ records, positive and negative cases, with real assertions — not just coverage.</p></div>
+          <div class="card"><div class="card-title">🔒 10. Be explicit about security</div><p>Declare <code>with sharing</code> / <code>without sharing</code> on handlers and enforce FLS where user data is exposed.</p></div>
+        </div>
+
+        <div class="compare">
+          <div class="compare-box"><div class="compare-header wrong">❌ SOQL + DML inside the loop</div>
+<pre><span class="kw">trigger</span> ContactTrigger <span class="kw">on</span> Contact (<span class="kw">after insert</span>) {
+  <span class="kw">for</span> (Contact c : Trigger.new) {
+    Account a = [<span class="kw">SELECT</span> Id <span class="kw">FROM</span> Account
+                 <span class="kw">WHERE</span> Id = :c.AccountId];
+    a.Description = <span class="str">'Has new contact'</span>;
+    <span class="kw">update</span> a;
+  }
+}
+<span class="cm">// 200 records = 200 queries + 200 DMLs → LIMIT EXCEPTION</span></pre></div>
+          <div class="compare-box"><div class="compare-header right">✅ Bulkified</div>
+<pre>Set&lt;Id&gt; accIds = <span class="kw">new</span> Set&lt;Id&gt;();
+<span class="kw">for</span> (Contact c : (List&lt;Contact&gt;) Trigger.new) {
+  <span class="kw">if</span> (c.AccountId != <span class="kw">null</span>) accIds.add(c.AccountId);
+}
+Map&lt;Id, Account&gt; accs = <span class="kw">new</span> Map&lt;Id, Account&gt;(
+  [<span class="kw">SELECT</span> Id <span class="kw">FROM</span> Account <span class="kw">WHERE</span> Id <span class="kw">IN</span> :accIds]);
+<span class="kw">for</span> (Account a : accs.values()) {
+  a.Description = <span class="str">'Has new contact'</span>;
+}
+<span class="kw">update</span> accs.values();  <span class="cm">// 1 query + 1 DML</span></pre></div>
+        </div>
+
+        <div class="sub-title">📏 Governor limits to remember (per transaction)</div>
+        <div class="table-wrap"><table>
+          <tr><th>Limit</th><th>Synchronous</th><th>Asynchronous</th></tr>
+          <tr><td>SOQL queries</td><td>100</td><td>200</td></tr>
+          <tr><td>DML statements</td><td colspan="2">150</td></tr>
+          <tr><td>Records retrieved by SOQL</td><td colspan="2">50,000</td></tr>
+          <tr><td>Records processed by DML</td><td colspan="2">10,000</td></tr>
+          <tr><td>CPU time</td><td>10 s</td><td>60 s</td></tr>
+          <tr><td>Heap size</td><td>6 MB</td><td>12 MB</td></tr>
+          <tr><td>Callouts</td><td colspan="2">100</td></tr>
+        </table></div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "One logic-less trigger per object that delegates to a handler; everything bulkified with no SOQL or DML in loops; before-context for same-record changes and after-context for related records; recursion guards; async processing for callouts; a bypass switch for data loads; and bulk tests with real assertions."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONE TRIGGER & HANDLERS -->
+    <section class="section" id="onetrigger">
+      <h2 class="section-title"><span>🧩</span> One Trigger per Object &amp; Trigger Handlers</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul><li>Why do we need one trigger per object?</li><li>Talk about trigger handlers.</li></ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Why one trigger per object?</div><span class="badge b-orange">Key Reason</span></div>
+          <div class="task-body">
+            <p>"Salesforce <strong>does not guarantee the execution order</strong> of multiple triggers on the same object and event. If two triggers both update a field, the final value can change unpredictably. A single trigger gives one entry point where I control the order of operations, recursion, bypass switches and testing."</p>
+            <ul class="checklist">
+              <li>Deterministic execution order (you decide it in the handler)</li>
+              <li>One place to add recursion control and bypass logic</li>
+              <li>Easier to read, debug and test</li>
+              <li>Fewer merge conflicts and deployment surprises</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">🧱 The Trigger Handler pattern</div><span class="badge b-blue">Architecture</span></div>
+          <div class="task-body">
+            <p>The trigger is a thin router. A <strong>handler class</strong> holds the logic, split by context. A shared base class dispatches on <code>Trigger.operationType</code>.</p>
+            <div class="code-wrap"><div class="code-label">AccountTrigger.trigger</div>
+<pre><span class="kw">trigger</span> AccountTrigger <span class="kw">on</span> Account (
+  <span class="kw">before insert, before update, before delete,
+  after insert, after update, after delete, after undelete</span>) {
+  <span class="kw">new</span> AccountTriggerHandler().run();
+}</pre></div>
+            <div class="code-wrap"><div class="code-label">TriggerHandler.cls (base class)</div>
+<pre><span class="kw">public virtual class</span> TriggerHandler {
+  <span class="kw">public void</span> run() {
+    <span class="kw">switch on</span> Trigger.operationType {
+      <span class="kw">when</span> BEFORE_INSERT  { beforeInsert(); }
+      <span class="kw">when</span> BEFORE_UPDATE  { beforeUpdate(); }
+      <span class="kw">when</span> BEFORE_DELETE  { beforeDelete(); }
+      <span class="kw">when</span> AFTER_INSERT   { afterInsert(); }
+      <span class="kw">when</span> AFTER_UPDATE   { afterUpdate(); }
+      <span class="kw">when</span> AFTER_DELETE   { afterDelete(); }
+      <span class="kw">when</span> AFTER_UNDELETE { afterUndelete(); }
+    }
+  }
+  <span class="kw">protected virtual void</span> beforeInsert()  {}
+  <span class="kw">protected virtual void</span> beforeUpdate()  {}
+  <span class="kw">protected virtual void</span> beforeDelete()  {}
+  <span class="kw">protected virtual void</span> afterInsert()   {}
+  <span class="kw">protected virtual void</span> afterUpdate()   {}
+  <span class="kw">protected virtual void</span> afterDelete()   {}
+  <span class="kw">protected virtual void</span> afterUndelete() {}
+}</pre></div>
+            <div class="code-wrap"><div class="code-label">AccountTriggerHandler.cls</div>
+<pre><span class="kw">public with sharing class</span> AccountTriggerHandler <span class="kw">extends</span> TriggerHandler {
+
+  <span class="kw">protected override void</span> beforeInsert() {
+    <span class="kw">for</span> (Account acc : (List&lt;Account&gt;) Trigger.new) {
+      <span class="kw">if</span> (<span class="kw">String</span>.isBlank(acc.Rating)) acc.Rating = <span class="str">'Cold'</span>;  <span class="cm">// no DML needed in "before"</span>
+    }
+  }
+
+  <span class="kw">protected override void</span> afterUpdate() {
+    Map&lt;Id, Account&gt; oldMap = (Map&lt;Id, Account&gt;) Trigger.oldMap;
+    List&lt;Account&gt; changed = <span class="kw">new</span> List&lt;Account&gt;();
+    <span class="kw">for</span> (Account acc : (List&lt;Account&gt;) Trigger.new) {
+      <span class="kw">if</span> (acc.Industry != oldMap.get(acc.Id).Industry) changed.add(acc);  <span class="cm">// only react to real changes</span>
+    }
+    <span class="kw">if</span> (!changed.isEmpty()) AccountService.syncIndustry(changed);
+  }
+}</pre></div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">♻️ Simple recursion guard</div>
+<pre><span class="kw">public class</span> TriggerGuard {
+  <span class="kw">private static</span> Set&lt;Id&gt; processed = <span class="kw">new</span> Set&lt;Id&gt;();
+  <span class="kw">public static</span> Boolean firstTime(Id recordId) {
+    <span class="kw">return</span> processed.add(recordId); <span class="cm">// false if already there</span>
+  }
+}</pre>
+          </div>
+          <div class="card">
+            <div class="card-title">🧭 Going further</div>
+            <ul class="checklist">
+              <li>Move logic into <strong>service</strong> classes; keep queries in <strong>selector</strong> classes (fflib-style)</li>
+              <li>Bypass via Custom Metadata (<code>Trigger_Setting__mdt</code>)</li>
+              <li>Mixed automation (Flows + triggers) shares one order of execution — document it</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALLOUT FROM TRIGGER -->
+    <section class="section" id="tcallout">
+      <h2 class="section-title"><span>🌐</span> Running an API Request from a Trigger</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>How would you run an API request from a trigger?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="alert alert-danger"><span class="alert-icon">🚨</span>
+          <div><strong>Trap:</strong> you cannot make a synchronous callout from a trigger. Salesforce throws <code>CalloutException: Callout from triggers are currently not supported</code>. The callout must happen <strong>asynchronously</strong>.</div>
+        </div>
+
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"The trigger runs inside a DML transaction, so it can't wait on an external system. I collect the record Ids in the handler and enqueue a <strong>Queueable</strong> job that implements <code>Database.AllowsCallouts</code>. The callout uses a <strong>Named Credential</strong> so no URL or secret is in code. For decoupled or multi-subscriber scenarios I publish a <strong>Platform Event</strong> instead."</p>
+            <ul class="checklist">
+              <li>Keeps the user's save fast and the transaction safe</li>
+              <li>An external timeout or failure never blocks or rolls back the DML</li>
+              <li>Failures can be logged, retried or chained</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Handler → Queueable → Named Credential</div>
+<pre><span class="cm">// Inside the handler (after update)</span>
+<span class="kw">protected override void</span> afterUpdate() {
+  Map&lt;Id, Opportunity&gt; oldMap = (Map&lt;Id, Opportunity&gt;) Trigger.oldMap;
+  Set&lt;Id&gt; wonIds = <span class="kw">new</span> Set&lt;Id&gt;();
+  <span class="kw">for</span> (Opportunity o : (List&lt;Opportunity&gt;) Trigger.new) {
+    <span class="kw">if</span> (o.StageName == <span class="str">'Closed Won'</span> &amp;&amp; oldMap.get(o.Id).StageName != <span class="str">'Closed Won'</span>) {
+      wonIds.add(o.Id);
+    }
+  }
+  <span class="kw">if</span> (!wonIds.isEmpty()) System.enqueueJob(<span class="kw">new</span> SyncOpportunityJob(wonIds));
+}
+
+<span class="kw">public class</span> SyncOpportunityJob <span class="kw">implements</span> Queueable, Database.AllowsCallouts {
+  <span class="kw">private</span> Set&lt;Id&gt; oppIds;
+  <span class="kw">public</span> SyncOpportunityJob(Set&lt;Id&gt; ids) { <span class="kw">this</span>.oppIds = ids; }
+
+  <span class="kw">public void</span> execute(QueueableContext ctx) {
+    List&lt;Opportunity&gt; opps = [<span class="kw">SELECT</span> Id, Name, Amount <span class="kw">FROM</span> Opportunity <span class="kw">WHERE</span> Id <span class="kw">IN</span> :oppIds];
+
+    HttpRequest req = <span class="kw">new</span> HttpRequest();
+    req.setEndpoint(<span class="str">'callout:ERP_API/opportunities'</span>);  <span class="cm">// Named Credential: URL + auth</span>
+    req.setMethod(<span class="str">'POST'</span>);
+    req.setHeader(<span class="str">'Content-Type'</span>, <span class="str">'application/json'</span>);
+    req.setBody(JSON.serialize(opps));
+
+    HttpResponse res = <span class="kw">new</span> Http().send(req);
+    <span class="kw">if</span> (res.getStatusCode() &gt;= <span class="num">300</span>) {
+      <span class="cm">// log the failure / retry / notify</span>
+    }
+  }
+}</pre></div>
+
+        <div class="sub-title">⚖️ Async options compared</div>
+        <div class="table-wrap"><table>
+          <tr><th>Option</th><th>Strengths</th><th>Limitations</th></tr>
+          <tr><td><code>@future(callout=true)</code></td><td>Very simple</td><td>Primitive parameters only, no chaining, no job Id, can't be called from future/batch</td></tr>
+          <tr><td><strong>Queueable + AllowsCallouts</strong></td><td>Complex parameters, chaining, monitorable job Id</td><td>Chain depth and queue limits apply</td></tr>
+          <tr><td><strong>Platform Event</strong></td><td>Decoupled, several subscribers, replay, survives retries</td><td>Eventually consistent; event allocations apply</td></tr>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- VALIDATION RULES -->
+    <section class="section" id="valrules">
+      <h2 class="section-title"><span>✅</span> Validation Rules</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>Validation rules in Salesforce — how do they work?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"A validation rule is a <strong>formula that returns TRUE when the data is invalid</strong>. If it evaluates to TRUE on save, the record is not saved and the configured error message is shown — at the top of the page or next to a field. They run on <strong>insert and update</strong> (not delete), no matter where the save comes from: UI, API, Apex, Flow or data import."</p>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="card"><div class="card-title">📐 Error Condition Formula</div><p>Returns TRUE for bad data. Use <code>ISBLANK</code>, <code>ISPICKVAL</code>, <code>ISCHANGED</code>, <code>PRIORVALUE</code>, <code>ISNEW</code>.</p></div>
+          <div class="card"><div class="card-title">💬 Error Message</div><p>Clear and actionable: tell the user <em>how to fix it</em>, not just what is wrong.</p></div>
+          <div class="card"><div class="card-title">📍 Error Location</div><p>Top of page, or attached to one specific field for better UX.</p></div>
+        </div>
+
+        <div class="sub-title">⏱️ Where it sits in the order of execution</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>System validation</strong> <span class="d">(required fields, formats, lengths)</span></div></div>
+          <div class="step"><div class="step-body"><strong>Before-save flows, then before triggers</strong></div></div>
+          <div class="step"><div class="step-body"><strong>Custom validation rules run</strong> <span class="d">— values changed by before-triggers are validated too</span></div></div>
+          <div class="step"><div class="step-body"><strong>Duplicate rules → record saved (not committed) → after triggers</strong></div></div>
+          <div class="step"><div class="step-body"><strong>Assignment/workflow rules, after-save flows … → commit</strong></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Formula examples</div>
+<pre><span class="cm">// 1. A Closed Won opportunity must have an amount</span>
+AND(
+  ISPICKVAL(StageName, <span class="str">"Closed Won"</span>),
+  OR(ISBLANK(Amount), Amount &lt;= 0)
+)
+
+<span class="cm">// 2. Same rule with a bypass for admins / data loads (Custom Permission)</span>
+AND(
+  NOT($Permission.Bypass_Validation),
+  ISPICKVAL(StageName, <span class="str">"Closed Won"</span>),
+  OR(ISBLANK(Amount), Amount &lt;= 0)
+)
+
+<span class="cm">// 3. Contract number can't be edited once it has a value</span>
+AND(
+  NOT(ISNEW()),
+  ISCHANGED(Contract_Number__c),
+  NOT(ISBLANK(PRIORVALUE(Contract_Number__c)))
+)</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Best practices</div>
+            <ul class="checklist">
+              <li>Always provide a bypass (Custom Permission / Custom Setting)</li>
+              <li>Guard against nulls with <code>ISBLANK</code></li>
+              <li>Keep formulas short; document the intent in the Description</li>
+              <li>Remember they also fire on integrations and imports</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--orange);">⚖️ Validation rule vs Apex <code>addError()</code></div>
+            <p>Use a declarative rule for field-level conditions an admin can maintain. Use <code>record.addError('message')</code> in a trigger when the check needs queries, other records or complex logic.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DML -->
+    <section class="section" id="dml">
+      <h2 class="section-title"><span>💾</span> <code style="font-size:1.1rem;">insert</code> vs <code style="font-size:1.1rem;">Database.insert</code></h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between Database.insert and a simple insert?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"The <code>insert</code> statement is <strong>all-or-nothing</strong>: if any record fails it throws a <code>DmlException</code> and the whole statement is rolled back. <code>Database.insert(records, allOrNone)</code> lets me set <code>allOrNone = false</code> for <strong>partial success</strong>: good records are saved and I get a <code>SaveResult</code> per record describing the failures."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th></th><th><code>insert records;</code></th><th><code>Database.insert(records, false)</code></th></tr>
+          <tr><td><strong>On failure</strong></td><td>Throws <code>DmlException</code>; whole statement rolled back</td><td>No exception for record errors; valid records are saved</td></tr>
+          <tr><td><strong>Result</strong></td><td>Nothing returned (Ids populated on the records)</td><td><code>Database.SaveResult[]</code> — one per record</td></tr>
+          <tr><td><strong>Error handling</strong></td><td><code>try / catch</code></td><td><code>isSuccess()</code>, <code>getErrors()</code></td></tr>
+          <tr><td><strong>Extras</strong></td><td>—</td><td><code>DmlOptions</code> (assignment rules, duplicate rules), <code>AccessLevel.USER_MODE</code></td></tr>
+          <tr><td><strong>Use when</strong></td><td>Any failure must abort the operation</td><td>Bulk loads / integrations where good records should still go through</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Side by side</div>
+<pre>List&lt;Account&gt; accs = <span class="kw">new</span> List&lt;Account&gt;{
+  <span class="kw">new</span> Account(Name = <span class="str">'Valid Inc.'</span>),
+  <span class="kw">new</span> Account()                    <span class="cm">// Name is required → this one fails</span>
+};
+
+<span class="cm">// 1) Simple DML: nothing is saved, exception is thrown</span>
+<span class="kw">try</span> { <span class="kw">insert</span> accs; }
+<span class="kw">catch</span> (DmlException e) { System.debug(e.getMessage()); }
+
+<span class="cm">// 2) Partial success: 'Valid Inc.' is saved, failure is reported</span>
+Database.SaveResult[] results = Database.insert(accs, <span class="kw">false</span>);
+<span class="kw">for</span> (Integer i = <span class="num">0</span>; i &lt; results.size(); i++) {
+  <span class="kw">if</span> (results[i].isSuccess()) {
+    System.debug(<span class="str">'Saved: '</span> + results[i].getId());
+  } <span class="kw">else for</span> (Database.Error err : results[i].getErrors()) {
+    System.debug(err.getStatusCode() + <span class="str">': '</span> + err.getMessage() + <span class="str">' | '</span> + err.getFields());
+  }
+}</pre></div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Detail that impresses:</strong> both forms count as <em>one</em> DML statement against the governor limit, and the default value of <code>allOrNone</code> is <code>true</code>. The same pattern applies to <code>update</code>, <code>upsert</code>, <code>delete</code> and <code>undelete</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECTED APP vs NAMED CREDENTIAL -->
+    <section class="section" id="capps">
+      <h2 class="section-title"><span>🔑</span> Connected App vs Named Credential</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between a connected app and a named credential?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Direction is the key</span></div>
+          <div class="task-body">
+            <p>"They solve opposite directions. A <strong>Connected App</strong> is <strong>inbound</strong>: it lets an external application authenticate <em>into</em> Salesforce (OAuth consumer key/secret, scopes, callback URL, policies). A <strong>Named Credential</strong> is <strong>outbound</strong>: it stores the endpoint and authentication Salesforce uses to call <em>out</em> to an external system, so no URL or secret lives in code."</p>
+            <p><strong>Memory trick:</strong> Connected App = who can call <em>me</em>. Named Credential = who <em>I</em> call.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th></th><th>Connected App / External Client App</th><th>Named Credential</th></tr>
+          <tr><td><strong>Direction</strong></td><td>Inbound: external app → Salesforce</td><td>Outbound: Salesforce → external system</td></tr>
+          <tr><td><strong>Salesforce acts as</strong></td><td>OAuth provider / API server</td><td>API client</td></tr>
+          <tr><td><strong>Configured with</strong></td><td>Consumer key/secret, callback URL, OAuth scopes, IP and session policies</td><td>Endpoint URL + an External Credential (OAuth 2.0, JWT, basic, custom headers…)</td></tr>
+          <tr><td><strong>Typical use</strong></td><td>Postman, mobile apps, middleware, CI/CD tools, SSO</td><td>Apex HTTP callouts, Flow external services, ERP/payment integrations</td></tr>
+          <tr><td><strong>In code</strong></td><td>Credentials live in the <em>external</em> app</td><td><code>callout:My_Named_Credential/path</code></td></tr>
+          <tr><td><strong>Secrets</strong></td><td>Held by the external application</td><td>Stored encrypted by Salesforce, never in code</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🏗️ How a Named Credential is built</div>
+            <ul class="checklist">
+              <li><strong>Named Credential</strong> → endpoint URL</li>
+              <li>references an <strong>External Credential</strong> → auth protocol</li>
+              <li><strong>Principals</strong> are mapped to permission sets / profiles</li>
+              <li>Tokens are stored encrypted per principal or user</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">📦 Why it is better than hard-coding</div>
+            <ul class="checklist">
+              <li>Change the URL in one place (per environment)</li>
+              <li>No secrets in code, Custom Settings or Git</li>
+              <li>Same Apex deploys to every org unchanged</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-warn"><span class="alert-icon">🆕</span>
+          <div><strong>Current state of the platform:</strong> since the Spring '26 release, creating <em>new</em> Connected Apps is disabled by default; <strong>External Client Apps (ECA)</strong> are the replacement for new inbound integrations, and existing connected apps keep working. Mention this — it shows you follow platform changes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLATFORM EVENTS -->
+    <section class="section" id="platev">
+      <h2 class="section-title"><span>📡</span> Platform Events</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>Tell me about platform events.</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Event-driven</span></div>
+          <div class="task-body">
+            <p>"Platform events are Salesforce's <strong>publish/subscribe messaging</strong> mechanism for event-driven architecture. A publisher sends an event message to the event bus and any number of subscribers react to it <strong>asynchronously</strong>, fully decoupled from each other. They are defined like custom objects with the <code>__e</code> suffix."</p>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">📤 Publishers</div>
+            <ul class="checklist">
+              <li>Apex: <code>EventBus.publish()</code></li>
+              <li>Flow (Create Records / publish action)</li>
+              <li>REST / SOAP / Pub/Sub API from external systems</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">📥 Subscribers</div>
+            <ul class="checklist">
+              <li>Apex trigger (<code>after insert</code> only)</li>
+              <li>Platform-event-triggered Flow</li>
+              <li>LWC / Aura via <code>lightning/empApi</code></li>
+              <li>External clients: CometD / Pub/Sub API</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Publish &amp; subscribe</div>
+<pre><span class="cm">// Publish</span>
+Order_Shipped__e evt = <span class="kw">new</span> Order_Shipped__e(
+  Order_Number__c = <span class="str">'SO-1001'</span>, Status__c = <span class="str">'Shipped'</span>);
+Database.SaveResult sr = EventBus.publish(evt);
+<span class="kw">if</span> (!sr.isSuccess()) {
+  <span class="kw">for</span> (Database.Error e : sr.getErrors()) System.debug(e.getMessage());
+}
+
+<span class="cm">// Subscribe (runs in its own transaction, as the Automated Process user by default)</span>
+<span class="kw">trigger</span> OrderShippedTrigger <span class="kw">on</span> Order_Shipped__e (<span class="kw">after insert</span>) {
+  <span class="kw">for</span> (Order_Shipped__e e : Trigger.new) {
+    <span class="cm">// notify customer, call ERP via Queueable, update records…</span>
+  }
+}</pre></div>
+
+        <div class="grid3">
+          <div class="card"><div class="card-title">⏳ Retention &amp; replay</div><p>High-volume events stay in the event bus for 72 hours. Every message has a <strong>replay ID</strong>, so a subscriber can catch up on events it missed within that window.</p></div>
+          <div class="card"><div class="card-title">🔀 Publish behavior</div><p><strong>Publish After Commit</strong> (default): only published if the transaction commits. <strong>Publish Immediately</strong>: published right away and can't be rolled back.</p></div>
+          <div class="card"><div class="card-title">🔁 Error handling</div><p>In an Apex subscriber, throw <code>EventBus.RetryableException</code> to retry, and use <code>setResumeCheckpoint</code> to control where processing resumes.</p></div>
+        </div>
+
+        <div class="sub-title">🆚 Platform Events vs Change Data Capture</div>
+        <div class="table-wrap"><table>
+          <tr><th></th><th>Platform Events</th><th>Change Data Capture</th></tr>
+          <tr><td><strong>Triggered by</strong></td><td>Your code / Flow / API (custom)</td><td>Record create/update/delete/undelete (automatic)</td></tr>
+          <tr><td><strong>Payload</strong></td><td>You design the fields</td><td>Changed fields of the record</td></tr>
+          <tr><td><strong>Use for</strong></td><td>Business events (<em>OrderShipped</em>), decoupled integrations</td><td>Keeping external systems in sync with data changes</td></tr>
+        </table></div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "I use platform events to decouple processes — for example publishing an event from a trigger and letting a subscriber make the callout, which keeps the save fast, allows multiple consumers, and gives me replay and retry for resilience."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOQL PARENTS -->
+    <section class="section" id="soqlparents">
+      <h2 class="section-title"><span>🪜</span> Parent Relationship Levels in SOQL</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul><li>How many parent layers of fields can we query?</li><li>How many such levels can we go up?</li></ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Number to remember: 5</span></div>
+          <div class="task-body">
+            <p>"In a child-to-parent query you can traverse <strong>up to 5 levels</strong> of parent relationships in a single field path. For example <code>Contact.Account.Owner.Manager.Name</code> from a Case goes up four levels."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Child → parent (going up)</div>
+<pre><span class="cm">-- Standard objects use the relationship name (Account), custom ones use __r</span>
+<span class="kw">SELECT</span> Id, Contact.Account.Owner.Manager.Name
+<span class="kw">FROM</span>   Case
+
+<span class="kw">SELECT</span> Name, Parent__r.Grandparent__r.Name
+<span class="kw">FROM</span>   Child__c</pre></div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Limit</th><th>Value</th></tr>
+          <tr><td>Child-to-parent levels in one field path</td><td><strong>5</strong></td></tr>
+          <tr><td>Child-to-parent relationships in one query</td><td>55</td></tr>
+          <tr><td>Parent-to-child relationships (subqueries) in one query</td><td>20</td></tr>
+          <tr><td>Parent-to-child levels (nested subqueries)</td><td>Up to 5 in API 58.0+; earlier versions allowed far fewer. Not supported for Bulk API, big objects or external objects</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Parent → child (going down)</div>
+<pre><span class="kw">SELECT</span> Name,
+       (<span class="kw">SELECT</span> LastName, Email <span class="kw">FROM</span> Contacts)    <span class="cm">-- plural child relationship name</span>
+<span class="kw">FROM</span>   Account</pre></div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Extra points:</strong> polymorphic fields (like <code>Owner</code> or <code>What</code>) can count several times against the 55-relationship limit, and every traversed relationship is an implicit join — keep queries selective.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY MODEL -->
+    <section class="section" id="secmodel">
+      <h2 class="section-title"><span>🛡️</span> Record vs Field Security</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul><li>Describe the difference in security for records and for object fields.</li><li>How is security different in Salesforce?</li></ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Layered model</span></div>
+          <div class="task-body">
+            <p>"Salesforce security is <strong>layered</strong>. <strong>Object (CRUD) and field-level security (FLS)</strong> decide <em>what kind of data</em> a user can touch — they are granted through profiles and permission sets. <strong>Record-level security</strong> decides <em>which rows</em> the user sees — it comes from the sharing model. A user needs to pass every layer."</p>
+          </div>
+        </div>
+
+        <div class="layer" style="border-color:#7fd6ff;"><h4>1 · Organization level</h4><p>Login hours and IP ranges, MFA, password policies, session settings.</p></div>
+        <div class="layer" style="border-color:var(--orange);"><h4>2 · Object level (CRUD)</h4><p>Create / Read / Edit / Delete on an object — via profiles, permission sets and permission set groups.</p></div>
+        <div class="layer" style="border-color:var(--purple);"><h4>3 · Field level (FLS)</h4><p>Visible / Read-only / Editable per field, for each profile or permission set.</p></div>
+        <div class="layer" style="border-color:var(--green);"><h4>4 · Record level (sharing)</h4><p>Org-Wide Defaults (the most restrictive baseline) → role hierarchy → sharing rules → manual sharing, teams, territories, Apex managed sharing. You <em>open up</em> access from a restrictive baseline.</p></div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="card-title">🧠 Example</div>
+          <p>A user has <strong>Read</strong> on Account (object), cannot see <strong>Annual Revenue</strong> (FLS), and only sees accounts they own or that are shared with them (record level). Three independent checks.</p>
+        </div>
+
+        <div class="sub-title">⚡ What changes in Apex</div>
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
+          <div>Apex runs in <strong>system mode by default</strong>: it ignores the running user's CRUD and FLS. Record sharing depends on the class keyword. You must enforce security <em>explicitly</em>.</div>
+        </div>
+        <div class="table-wrap"><table>
+          <tr><th>Mechanism</th><th>CRUD</th><th>FLS</th><th>Record sharing</th></tr>
+          <tr><td>Default Apex (system mode)</td><td>Not enforced</td><td>Not enforced</td><td>Per class keyword</td></tr>
+          <tr><td><code>with sharing</code> / <code>without sharing</code> / <code>inherited sharing</code></td><td>—</td><td>—</td><td>Enforced / ignored / inherits the caller</td></tr>
+          <tr><td><code>WITH USER_MODE</code> / <code>AccessLevel.USER_MODE</code></td><td>Enforced</td><td>Enforced</td><td>Enforced</td></tr>
+          <tr><td><code>WITH SECURITY_ENFORCED</code></td><td>Enforced</td><td>Enforced (fields in SELECT only)</td><td>—</td></tr>
+          <tr><td><code>Security.stripInaccessible()</code></td><td>—</td><td>Removes inaccessible fields from results</td><td>—</td></tr>
+          <tr><td>Describe checks (<code>isAccessible()</code>…)</td><td>Manual</td><td>Manual</td><td>—</td></tr>
+        </table></div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "Object and field permissions control what data types and columns a user can access; the sharing model controls which records. Apex runs in system mode, so I declare a sharing keyword on every class and enforce CRUD/FLS with <code>WITH USER_MODE</code> or <code>stripInaccessible</code> wherever data is exposed to users."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLS SCENARIO -->
+    <section class="section" id="fls">
+      <h2 class="section-title"><span>🧠</span> Query Fields the User Can't Access</h2>
+      <div class="qbox"><div class="qlabel">Scenario asked</div>
+        <p>You are building a query and realize the user won't have access to several of its fields — but you still need them for your calculations. How do you build the query so it can read them <em>without changing the user's permissions</em>?</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Scenario</span></div>
+          <div class="task-body">
+            <p>"I run that query in <strong>system mode</strong> — Apex's default — and I do <em>not</em> add <code>WITH USER_MODE</code> or <code>WITH SECURITY_ENFORCED</code> to it, because those would throw an exception when a field is inaccessible. I make the choice explicit with <code>WITH SYSTEM_MODE</code>, keep the class <code>with sharing</code> for record-level security, perform the calculation on the server, and return <strong>only the result</strong> — never the hidden fields."</p>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Read in system mode</strong> <span class="d">— omit user-mode enforcement for this query; <code>WITH SYSTEM_MODE</code> documents the intent.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Decide record visibility separately</strong> <span class="d">— <code>with sharing</code> unless the business case truly needs <code>without sharing</code> (and then isolate it).</span></div></div>
+          <div class="step"><div class="step-body"><strong>Compute server-side, return a DTO or a value</strong> <span class="d">— don't hand the full SObject to the UI/API.</span></div></div>
+          <div class="step"><div class="step-body"><strong>If you must return records</strong> <span class="d">— run <code>Security.stripInaccessible(AccessType.READABLE, records)</code> first.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Encapsulate and document</strong> <span class="d">— a small, named service class with a comment explaining why elevation is justified, covered by tests.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Elevated read, minimal exposure</div>
+<pre><span class="kw">public with sharing class</span> MarginService {
+
+  <span class="ann">@AuraEnabled</span>(cacheable=<span class="kw">true</span>)
+  <span class="kw">public static</span> Decimal calculateMargin(Id oppId) {
+    <span class="cm">// Intentional SYSTEM_MODE: Cost__c is hidden from the user by FLS but is
+    // required for the calculation. Only the computed margin leaves this method.</span>
+    Opportunity opp = [
+      <span class="kw">SELECT</span> Id, Amount, Cost__c
+      <span class="kw">FROM</span>   Opportunity
+      <span class="kw">WHERE</span>  Id = :oppId
+      <span class="kw">WITH</span>   SYSTEM_MODE
+      <span class="kw">LIMIT</span>  <span class="num">1</span>
+    ];
+    <span class="kw">if</span> (opp.Amount == <span class="kw">null</span> || opp.Amount == <span class="num">0</span>) <span class="kw">return null</span>;
+    <span class="kw">return</span> (opp.Amount - opp.Cost__c) / opp.Amount;   <span class="cm">// value only, no hidden fields</span>
+  }
+}</pre></div>
+
+        <div class="compare">
+          <div class="compare-box"><div class="compare-header wrong">❌ Wrong approaches</div>
+            <div class="pad"><ul class="crosslist">
+              <li>Giving users a broader permission set just for this</li>
+              <li><code>WITH USER_MODE</code> / <code>WITH SECURITY_ENFORCED</code> → throws when a field is inaccessible</li>
+              <li>Returning the full SObject to an LWC → leaks the hidden fields</li>
+              <li><code>without sharing</code> everywhere "to make it work"</li>
+            </ul></div></div>
+          <div class="compare-box"><div class="compare-header right">✅ Good alternatives</div>
+            <div class="pad"><ul class="checklist">
+              <li>A <strong>formula field</strong> (it evaluates in system context, so users see the result without access to the inputs)</li>
+              <li>A roll-up or aggregate stored on a visible field</li>
+              <li>A dedicated service class, tested and security-reviewed</li>
+            </ul></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EX 1 -->
+    <section class="section" id="ex1">
+      <h2 class="section-title"><span>💻</span> Live SOQL #1 — Parent + Children, Filtered by a Related Object</h2>
+
+      <div class="alert alert-info"><span class="alert-icon">💬</span>
+        <div><strong>Format:</strong> you type the query into a Teams chat while the interviewer watches. Use the code-snippet option (<code>&lt;/&gt;</code>) so indentation survives, talk through your reasoning, and state your assumptions (API names, field names).</div>
+      </div>
+
+      <div class="qbox"><div class="qlabel">Practice prompt (same pattern as the live round)</div>
+        <p>Get a list of Accounts and their Contacts, only for those Accounts that have at least one Opportunity with an Amount greater than 250,000 that is Closed Won.</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="sub-title">🧭 How to think about it (3 steps)</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Output shape → parent with children</strong> <span class="d">"Accounts <em>and their</em> Contacts" = <code>FROM Account</code> plus a <strong>child subquery</strong> on the <code>Contacts</code> relationship.</span></div></div>
+          <div class="step"><div class="step-body"><strong>The filter is on a <em>different</em> object</strong> <span class="d">"Accounts that have at least one Opportunity…" can't be written as a join. Use a <strong>semi-join</strong>: <code>Id IN (SELECT AccountId FROM Opportunity WHERE …)</code>.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Validate edge cases</strong> <span class="d">thresholds (<code>&gt;</code> vs <code>&gt;=</code>), nulls, "closed won" definition, accounts without contacts.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Solution</div>
+<pre><span class="kw">SELECT</span> Id, Name,
+       (<span class="kw">SELECT</span> Id, FirstName, LastName, Email <span class="kw">FROM</span> Contacts)
+<span class="kw">FROM</span>   Account
+<span class="kw">WHERE</span>  Id <span class="kw">IN</span> (
+         <span class="kw">SELECT</span> AccountId
+         <span class="kw">FROM</span>   Opportunity
+         <span class="kw">WHERE</span>  Amount &gt; <span class="num">250000</span>
+         <span class="kw">AND</span>    StageName = <span class="str">'Closed Won'</span>
+       )</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🔍 Why it works</div>
+            <ul class="checklist">
+              <li>The semi-join returns each qualifying account once — <strong>no duplicates</strong> and no <code>DISTINCT</code> needed</li>
+              <li>"At least one" is exactly what <code>IN (subquery)</code> expresses</li>
+              <li><code>Contacts</code> is the <strong>child relationship name</strong> (plural); custom relationships end in <code>__r</code></li>
+              <li>The subquery must return a single Id/reference field</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ Common mistakes</div>
+            <ul class="crosslist">
+              <li>Filtering with <code>WHERE Opportunities.Amount …</code> in the outer query (not valid)</li>
+              <li>Putting the Opportunity filter inside the <em>Contacts</em> subquery (filters contacts, not accounts)</li>
+              <li>Using <code>HAVING COUNT(...)</code> where no aggregate is needed</li>
+              <li>Forgetting that <code>Id IN</code> is a semi-join, not a join — you can't select Opportunity fields this way</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sub-title">✨ Points that make the answer senior</div>
+        <ul class="checklist">
+          <li>Mention <code>IsWon = true</code> as a more robust alternative to the literal <code>'Closed Won'</code> stage name</li>
+          <li>If only accounts that <em>also</em> have contacts are wanted, add <code>AND Id IN (SELECT AccountId FROM Contact)</code></li>
+          <li>If a flat list is preferred: <code>SELECT Id, FirstName, Account.Name FROM Contact WHERE AccountId IN (SELECT AccountId FROM Opportunity WHERE …)</code></li>
+          <li>In Apex, iterate with <code>for (Account a : accounts) { for (Contact c : a.Contacts) { … } }</code></li>
+          <li>Test it in the Developer Console Query Editor and watch selectivity on large data volumes</li>
+        </ul>
+
+        <div class="sub-title">🏋️ More practice (same pattern)</div>
+        <details><summary>A) Accounts with their <em>open</em> Opportunities, only for Accounts that have at least one High-priority Case</summary>
+          <div><div class="code-wrap"><pre><span class="kw">SELECT</span> Id, Name,
+       (<span class="kw">SELECT</span> Id, Name, Amount <span class="kw">FROM</span> Opportunities <span class="kw">WHERE</span> IsClosed = <span class="kw">false</span>)
+<span class="kw">FROM</span>   Account
+<span class="kw">WHERE</span>  Id <span class="kw">IN</span> (<span class="kw">SELECT</span> AccountId <span class="kw">FROM</span> Case <span class="kw">WHERE</span> Priority = <span class="str">'High'</span>)</pre></div></div></details>
+        <details><summary>B) Accounts that have <em>no</em> Opportunities at all (anti-join)</summary>
+          <div><div class="code-wrap"><pre><span class="kw">SELECT</span> Id, Name
+<span class="kw">FROM</span>   Account
+<span class="kw">WHERE</span>  Id <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> AccountId <span class="kw">FROM</span> Opportunity)</pre></div></div></details>
+      </div>
+    </section>
+
+    <!-- EX 2 -->
+    <section class="section" id="ex2">
+      <h2 class="section-title"><span>📊</span> Live SOQL #2 — Most Common Value (Aggregate)</h2>
+
+      <div class="qbox"><div class="qlabel">Practice prompt (same pattern as the live round)</div>
+        <p>Write a SOQL query that finds the most common <code>Industry</code> among Accounts.</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="sub-title">🧭 How to think about it (3 steps)</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>"Most common" = group and count</strong> <span class="d"><code>GROUP BY</code> the field and <code>COUNT(Id)</code> per group.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Sort by the count, biggest first</strong> <span class="d"><code>ORDER BY COUNT(Id) DESC</code> — note that you order by the <em>aggregate</em>, not by an alias.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Keep only the winner</strong> <span class="d"><code>LIMIT 1</code>, and exclude blanks so <code>null</code> doesn't win.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Solution</div>
+<pre><span class="kw">SELECT</span>   Industry, <span class="fn">COUNT</span>(Id) total
+<span class="kw">FROM</span>     Account
+<span class="kw">WHERE</span>    Industry != <span class="kw">null</span>
+<span class="kw">GROUP BY</span> Industry
+<span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(Id) <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>    <span class="num">1</span></pre></div>
+
+        <div class="code-wrap"><div class="code-label">Reading the result in Apex</div>
+<pre>List&lt;AggregateResult&gt; rows = [
+  <span class="kw">SELECT</span> Industry, <span class="fn">COUNT</span>(Id) total
+  <span class="kw">FROM</span>   Account
+  <span class="kw">WHERE</span>  Industry != <span class="kw">null</span>
+  <span class="kw">GROUP BY</span> Industry
+  <span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(Id) <span class="kw">DESC</span>
+  <span class="kw">LIMIT</span> <span class="num">1</span>
+];
+<span class="kw">if</span> (!rows.isEmpty()) {
+  String topIndustry = (String)  rows[<span class="num">0</span>].get(<span class="str">'Industry'</span>);
+  Integer total      = (Integer) rows[<span class="num">0</span>].get(<span class="str">'total'</span>);
+}</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🔍 Things to say out loud</div>
+            <ul class="checklist">
+              <li>Aggregate queries return <code>AggregateResult</code> rows, not SObjects</li>
+              <li>Every selected field must be aggregated or in <code>GROUP BY</code></li>
+              <li><strong>Ties:</strong> <code>LIMIT 1</code> returns just one of them — use <code>LIMIT 3</code> or compare counts if ties matter</li>
+              <li>Use a <code>List</code> so an empty result doesn't throw "no rows for assignment"</li>
+              <li>Doing it in SOQL beats counting in an Apex <code>Map</code>: it runs in the database and saves heap and rows</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ Common mistakes</div>
+            <ul class="crosslist">
+              <li><code>ORDER BY total DESC</code> — aliases aren't allowed in <code>ORDER BY</code></li>
+              <li>Selecting a non-grouped field next to <code>COUNT()</code></li>
+              <li>Forgetting <code>Industry != null</code> and getting a blank "winner"</li>
+              <li>Using <code>HAVING</code> to get the max (it only filters groups)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sub-title">🏋️ More practice (same pattern)</div>
+        <details><summary>A) The Account with the most Contacts</summary>
+          <div><div class="code-wrap"><pre><span class="kw">SELECT</span>   AccountId, <span class="fn">COUNT</span>(Id) total
+<span class="kw">FROM</span>     Contact
+<span class="kw">WHERE</span>    AccountId != <span class="kw">null</span>
+<span class="kw">GROUP BY</span> AccountId
+<span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(Id) <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>    <span class="num">1</span></pre></div></div></details>
+        <details><summary>B) The top 3 Lead Sources among Leads</summary>
+          <div><div class="code-wrap"><pre><span class="kw">SELECT</span>   LeadSource, <span class="fn">COUNT</span>(Id) total
+<span class="kw">FROM</span>     Lead
+<span class="kw">WHERE</span>    LeadSource != <span class="kw">null</span>
+<span class="kw">GROUP BY</span> LeadSource
+<span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(Id) <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>    <span class="num">3</span></pre></div></div></details>
+        <details><summary>C) Industries that appear more than 5 times</summary>
+          <div><div class="code-wrap"><pre><span class="kw">SELECT</span>   Industry, <span class="fn">COUNT</span>(Id) total
+<span class="kw">FROM</span>     Account
+<span class="kw">GROUP BY</span> Industry
+<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(Id) &gt; <span class="num">5</span></pre></div></div></details>
+      </div>
+    </section>
+
+    <!-- GIT -->
+    <section class="section" id="git">
+      <h2 class="section-title"><span>🌿</span> Git Pull vs Git Fetch</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between git pull and git fetch?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"<code>git fetch</code> only <strong>downloads</strong> new commits, branches and tags from the remote into your remote-tracking branches (like <code>origin/main</code>) — it never touches your working directory or current branch. <code>git pull</code> is <strong>fetch + merge</strong> (or fetch + rebase with <code>--rebase</code>): it also integrates those changes into the branch you are on."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Mental model</div>
+<pre>remote (origin)
+     │  git fetch              downloads only
+     ▼
+origin/main  (remote-tracking branch)
+     │  git merge origin/main  integrates into your branch
+     ▼
+main  (your local branch)
+
+git pull  =  git fetch  +  git merge   (or  git fetch + git rebase)</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🔎 git fetch — safe look</div>
+<pre>git fetch origin
+git log HEAD..origin/main --oneline   <span class="cm"># what's new?</span>
+git diff origin/main                  <span class="cm"># how does it differ?</span>
+git merge origin/main                 <span class="cm"># integrate when ready</span></pre>
+          </div>
+          <div class="card">
+            <div class="card-title">⬇️ git pull — update now</div>
+<pre>git pull                  <span class="cm"># fetch + merge</span>
+git pull --rebase         <span class="cm"># fetch + rebase (linear history)</span></pre>
+            <p style="margin-top:8px;">Pulling with uncommitted work can create conflicts you didn't expect — fetch first when in doubt.</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Salesforce angle:</strong> in a source-driven workflow, Git is the source of truth. Fetch before deploying to a scratch org, and expect merge conflicts in metadata XML (profiles, flows, layouts) — resolve them carefully and re-deploy to validate.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHEAT SHEET -->
+    <section class="section" id="cheat">
+      <h2 class="section-title"><span>⚡</span> Quick-Fire Cheat Sheet</h2>
+      <p style="color:var(--muted);margin-bottom:12px;">One-liners for a last review before the interview.</p>
+      <div class="table-wrap"><table>
+        <tr><th>#</th><th>Topic</th><th>One-line answer</th></tr>
+        <tr><td>1</td><td>Many-to-many</td><td>Junction object with two Master-Detail relationships (max 2 per object); Lookups if lifecycles must be independent.</td></tr>
+        <tr><td>2</td><td>Sandbox vs scratch org</td><td>Sandbox = persistent copy of production; scratch org = disposable, source-driven, built from a definition file (1–30 days).</td></tr>
+        <tr><td>3</td><td>Sandbox types</td><td>Developer (200 MB, 1 day) · Developer Pro (1 GB, 1 day) · Partial Copy (5 GB, 5 days, template) · Full (production size, 29 days).</td></tr>
+        <tr><td>4</td><td>Trigger best practices</td><td>Logic-less trigger + handler, bulkify, no SOQL/DML in loops, recursion guard, async for slow work, bulk tests.</td></tr>
+        <tr><td>5</td><td>One trigger per object</td><td>Execution order of multiple triggers isn't guaranteed; one entry point gives control.</td></tr>
+        <tr><td>6</td><td>Callout from a trigger</td><td>Not allowed synchronously → Queueable + <code>Database.AllowsCallouts</code> (or @future / Platform Event) with a Named Credential.</td></tr>
+        <tr><td>7</td><td>Validation rule</td><td>Formula that returns TRUE for invalid data; runs on insert/update after before-triggers; blocks the save.</td></tr>
+        <tr><td>8</td><td>Connected app vs named credential</td><td>Inbound (external → Salesforce) vs outbound (Salesforce → external); new connected apps disabled by default since Spring '26 → External Client Apps.</td></tr>
+        <tr><td>9</td><td>Parent levels</td><td>Up to 5 levels child-to-parent in one SOQL field path.</td></tr>
+        <tr><td>10</td><td>Security</td><td>CRUD/FLS via profiles &amp; permission sets; records via OWD, role hierarchy, sharing rules; Apex runs in system mode by default.</td></tr>
+        <tr><td>11</td><td>insert vs Database.insert</td><td>All-or-nothing with exception vs optional partial success with <code>SaveResult</code>.</td></tr>
+        <tr><td>12</td><td>Pull vs fetch</td><td>Fetch only downloads; pull = fetch + merge (or rebase).</td></tr>
+        <tr><td>13</td><td>Platform events</td><td>Pub/sub messaging: <code>EventBus.publish</code>; subscribe with trigger/Flow/LWC/CometD; 72 h retention with replay ID.</td></tr>
+        <tr><td>14</td><td>Query hidden fields</td><td>System mode (no USER_MODE), <code>with sharing</code>, return only the computed result or <code>stripInaccessible</code>.</td></tr>
+      </table></div>
+    </section>
+
+    <!-- TIPS -->
+    <section class="section" id="tips">
+      <h2 class="section-title"><span>💡</span> Interview Tips</h2>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title" style="color:var(--green);">✅ Do</div>
+          <ul class="checklist">
+            <li>Answer in 3 layers: one-line definition → how it works → a real example</li>
+            <li>Name governor limits and best practices unprompted</li>
+            <li>In the SOQL chat, state your assumptions (field and relationship names) before typing</li>
+            <li>Think out loud — explain <em>why</em> you chose a semi-join or an aggregate</li>
+            <li>Mention modern platform direction: External Client Apps, <code>USER_MODE</code>, Flow-first, source-driven development</li>
+            <li>Use short real stories: "In a project we bulkified a trigger and cut the limit errors to zero"</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--red);">❌ Avoid</div>
+          <ul class="crosslist">
+            <li>Saying a callout can be made directly from a trigger</li>
+            <li>Mixing up connected apps (inbound) and named credentials (outbound)</li>
+            <li>Putting SOQL or DML inside loops in any example</li>
+            <li>Claiming Apex enforces field-level security by default — it doesn't</li>
+            <li>Guessing numbers; say "I'd verify the exact limit in the docs" instead</li>
+            <li>Writing queries in the chat without testing the logic mentally against edge cases</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="task-box" style="margin-top:18px;">
+        <div class="task-header"><div class="task-title">🎯 Strong Closing Lines</div><span class="badge b-green">Make an impact</span></div>
+        <div class="task-body">
+          <ul class="checklist">
+            <li>"I design triggers to be bulk-safe, logic-less and easy to test, and I move slow work to async processing."</li>
+            <li>"I choose the security mechanism deliberately: sharing keyword for records, USER_MODE or stripInaccessible for CRUD and FLS."</li>
+            <li>"I keep integrations secret-free in code by using Named Credentials, and decouple them with platform events when it makes sense."</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot">Independent study guide for interview preparation. Salesforce, Trailhead, Astro, Codey and related marks are trademarks of Salesforce, Inc. Always verify limits and release-specific behavior in the official documentation, as they change between releases.</div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ═══════════════ MASCOT ═══════════════
+     Paste the URL (or a base64 data URI) of the official Trailhead mascot image
+     (Astro / Codey) between the quotes. Leave empty to keep the ☁️ placeholder. */
+  var MASCOT_URL = "";
+
+  var slots = document.querySelectorAll('[data-mascot]');
+  if (MASCOT_URL) {
+    Array.prototype.forEach.call(slots, function (slot) {
+      var img = slot.querySelector('img');
+      img.addEventListener('load',  function () { slot.classList.add('has-img'); });
+      img.addEventListener('error', function () { slot.classList.remove('has-img'); });
+      img.src = MASCOT_URL;
+    });
+  }
+
+  /* ═══════════════ NAVIGATION ═══════════════ */
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  var menuBtn = document.getElementById('menuBtn');
+  var links   = Array.prototype.slice.call(document.querySelectorAll('.nav-link[data-target]'));
+  var seen    = {};
+
+  function setMenu(open) {
+    sidebar.classList.toggle('open', open);
+    overlay.classList.toggle('show', open);
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  menuBtn.addEventListener('click', function () { setMenu(!sidebar.classList.contains('open')); });
+  overlay.addEventListener('click', function () { setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+  function setActive(id) {
+    links.forEach(function (l) { l.classList.toggle('active', l.getAttribute('data-target') === id); });
+  }
+
+  var ranks = [[0,'Scout'],[15,'Hiker'],[35,'Explorer'],[55,'Adventurer'],[75,'Mountaineer'],[95,'Ranger']];
+  function updateProgress() {
+    var n = Object.keys(seen).length, total = links.length;
+    var pct = Math.round(n / total * 100);
+    var rank = ranks[0][1];
+    ranks.forEach(function (r) { if (pct >= r[0]) rank = r[1]; });
+    document.getElementById('barFill').style.width = pct + '%';
+    document.getElementById('pText').textContent = n + ' of ' + total + ' sections';
+    document.getElementById('rank').textContent = rank;
+  }
+  function markSeen(id) {
+    if (seen[id]) return;
+    seen[id] = true;
+    links.forEach(function (l) { if (l.getAttribute('data-target') === id) l.classList.add('seen'); });
+    updateProgress();
+  }
+
+  function go(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActive(id);
+    markSeen(id);
+    setMenu(false);
+  }
+
+  /* Event delegation: works for sidebar links AND the topic-map chips */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-target]') : null;
+    if (!t) return;
+    e.preventDefault();
+    go(t.getAttribute('data-target'));
+  });
+
+  /* Highlight the section crossing a band near the top of the viewport */
+  var targets = links.map(function (l) { return document.getElementById(l.getAttribute('data-target')); })
+                     .filter(Boolean);
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { setActive(en.target.id); markSeen(en.target.id); }
+      });
+    }, { rootMargin: '-15% 0px -75% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* ═══════════════ PRACTICE MODE ═══════════════ */
+  var pBtn = document.getElementById('practiceBtn');
+  pBtn.addEventListener('click', function () {
+    var on = document.body.classList.toggle('practice');
+    pBtn.classList.toggle('on', on);
+    pBtn.textContent = on ? '🎯 Practice mode: ON' : '🎯 Practice mode: OFF';
+    if (!on) {
+      Array.prototype.forEach.call(document.querySelectorAll('.answer-zone.revealed'), function (z) {
+        z.classList.remove('revealed');
+      });
+    }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.answer-zone'), function (z) {
+    z.addEventListener('click', function (e) {
+      if (document.body.classList.contains('practice') && !z.classList.contains('revealed')) {
+        e.preventDefault();
+        e.stopPropagation();
+        z.classList.add('revealed');
+      }
+    }, true);
+  });
+
+  /* init */
+  setActive('intro');
+  markSeen('intro');
+})();
+</script>
+</body>
+</html>
