@@ -153,7 +153,6 @@
   body.practice .answer-zone:not(.revealed) {
     max-height:150px; overflow:hidden; filter:blur(7px); cursor:pointer; user-select:none; position:relative;
   }
-  body.practice .answer-zone.revealed ~ * { }
   .answer-zone { transition:filter .25s ease; }
 
   /* Cards / boxes */
@@ -312,7 +311,7 @@
     <div class="progress-box">
       <div class="p-top"><span>🏕️ Trail progress</span><b id="rank">Scout</b></div>
       <div class="bar"><i id="barFill"></i></div>
-      <div class="p-sub" id="pText">0 of 19 sections</div>
+      <div class="p-sub" id="pText">0 of 29 sections</div>
     </div>
 
     <div class="nav-section">Overview</div>
@@ -321,18 +320,25 @@
 
     <div class="nav-section">Data Model &amp; Environments</div>
     <a class="nav-link" href="#m2m" data-target="m2m"><span class="dot"></span>Many-to-Many Relationships</a>
+    <a class="nav-link" href="#relationships" data-target="relationships"><span class="dot"></span>Object Relationship Types</a>
     <a class="nav-link" href="#envs" data-target="envs"><span class="dot"></span>Sandboxes vs Scratch Orgs</a>
+    <a class="nav-link" href="#settings" data-target="settings"><span class="dot"></span>Custom Settings vs Metadata</a>
 
     <div class="nav-section">Apex &amp; Automation</div>
     <a class="nav-link" href="#tbest" data-target="tbest"><span class="dot"></span>Trigger Best Practices</a>
     <a class="nav-link" href="#onetrigger" data-target="onetrigger"><span class="dot"></span>One Trigger &amp; Handlers</a>
+    <a class="nav-link" href="#trigfw" data-target="trigfw"><span class="dot"></span>Trigger Frameworks &amp; Bypass</a>
     <a class="nav-link" href="#tcallout" data-target="tcallout"><span class="dot"></span>API Request from a Trigger</a>
     <a class="nav-link" href="#valrules" data-target="valrules"><span class="dot"></span>Validation Rules</a>
     <a class="nav-link" href="#dml" data-target="dml"><span class="dot"></span>insert vs Database.insert</a>
+    <a class="nav-link" href="#asyncapex" data-target="asyncapex"><span class="dot"></span>Batch vs Queueable</a>
+    <a class="nav-link" href="#batchretry" data-target="batchretry"><span class="dot"></span>Custom Batch Retry</a>
+    <a class="nav-link" href="#testcallout" data-target="testcallout"><span class="dot"></span>Testing Integrations</a>
 
     <div class="nav-section">Integration &amp; Events</div>
     <a class="nav-link" href="#capps" data-target="capps"><span class="dot"></span>Connected App vs Named Cred.</a>
     <a class="nav-link" href="#platev" data-target="platev"><span class="dot"></span>Platform Events</a>
+    <a class="nav-link" href="#triglwc" data-target="triglwc"><span class="dot"></span>Trigger → LWC</a>
 
     <div class="nav-section">SOQL &amp; Security</div>
     <a class="nav-link" href="#soqlparents" data-target="soqlparents"><span class="dot"></span>Parent Relationship Levels</a>
@@ -344,7 +350,10 @@
     <a class="nav-link" href="#ex2" data-target="ex2"><span class="dot"></span>SOQL: Most Common Value</a>
 
     <div class="nav-section">DevOps</div>
-    <a class="nav-link" href="#git" data-target="git"><span class="dot"></span>Git Pull vs Git Fetch</a>
+    <a class="nav-link" href="#cicd" data-target="cicd"><span class="dot"></span>CI/CD</a>
+    <a class="nav-link" href="#git" data-target="git"><span class="dot"></span>Pull, Fetch, Merge &amp; Rebase</a>
+    <a class="nav-link" href="#destructive" data-target="destructive"><span class="dot"></span>Removing Unused Metadata</a>
+    <a class="nav-link" href="#rollback" data-target="rollback"><span class="dot"></span>Rolling Back Production</a>
 
     <div class="nav-section">Wrap-up</div>
     <a class="nav-link" href="#cheat" data-target="cheat"><span class="dot"></span>Quick-Fire Cheat Sheet</a>
@@ -361,13 +370,15 @@
       <div class="hero-text">
         <div class="badge-top">☁️ Salesforce Developer</div>
         <h1><span>Salesforce Developer</span> Interview Guide</h1>
-        <p>Everything you need for the technical interview: data modeling, environments, Apex triggers, integrations, SOQL, the security model, platform events, Git — plus the live SOQL round you will type into a Teams chat.</p>
+        <p>Everything you need for the technical interview: data modeling, environments, Apex triggers and async processing, integrations, SOQL, the security model, platform events, CI/CD and Git — plus the live SOQL round you will type into a Teams chat.</p>
         <div class="tags">
           <span class="tag">⚡ Apex</span>
           <span class="tag">🔎 SOQL</span>
           <span class="tag">🔁 Triggers</span>
           <span class="tag">🔐 Security</span>
           <span class="tag">📡 Platform Events</span>
+          <span class="tag">⚛️ LWC</span>
+          <span class="tag">🚀 CI/CD</span>
           <span class="tag">🧪 Scratch Orgs</span>
         </div>
         <div class="hero-actions">
@@ -383,7 +394,7 @@
       <h2 class="section-title"><span>🗺️</span> Interview Map &amp; Format</h2>
 
       <div class="alert alert-info"><span class="alert-icon">ℹ️</span>
-        <div>The interview mixes <strong>conceptual questions</strong> (data model, Apex, security, integrations) with a <strong>live coding round where you type SOQL into a Teams chat</strong> — no IDE, no autocomplete, no execution. You must know the syntax by heart and explain your reasoning out loud.</div>
+        <div>The interview mixes <strong>conceptual questions</strong> (data model, Apex, security, integrations, DevOps) with a <strong>live coding round where you type SOQL into a Teams chat</strong> — no IDE, no autocomplete, no execution. You must know the syntax by heart and explain your reasoning out loud.</div>
       </div>
 
       <div class="sub-title">📌 Topics you will be asked about (click to jump)</div>
@@ -398,10 +409,20 @@
         <a class="chip" href="#soqlparents" data-target="soqlparents"><b>8</b>Parent levels in a query</a>
         <a class="chip" href="#secmodel" data-target="secmodel"><b>9</b>Record vs field security</a>
         <a class="chip" href="#dml" data-target="dml"><b>10</b>insert vs Database.insert</a>
-        <a class="chip" href="#git" data-target="git"><b>11</b>Git pull vs fetch</a>
+        <a class="chip" href="#git" data-target="git"><b>11</b>Pull, fetch, merge &amp; rebase</a>
         <a class="chip" href="#platev" data-target="platev"><b>12</b>Platform events</a>
         <a class="chip" href="#fls" data-target="fls"><b>13</b>Query fields the user can't see</a>
         <a class="chip" href="#ex1" data-target="ex1"><b>14</b>Live SOQL (2 exercises)</a>
+        <a class="chip" href="#relationships" data-target="relationships"><b>15</b>Object relationship types</a>
+        <a class="chip" href="#settings" data-target="settings"><b>16</b>Custom settings vs custom metadata</a>
+        <a class="chip" href="#trigfw" data-target="trigfw"><b>17</b>Trigger frameworks &amp; data-load bypass</a>
+        <a class="chip" href="#asyncapex" data-target="asyncapex"><b>18</b>Batch vs Queueable</a>
+        <a class="chip" href="#batchretry" data-target="batchretry"><b>19</b>Custom retry for a batch</a>
+        <a class="chip" href="#testcallout" data-target="testcallout"><b>20</b>Testing external integrations</a>
+        <a class="chip" href="#triglwc" data-target="triglwc"><b>21</b>Connecting a trigger to an LWC</a>
+        <a class="chip" href="#cicd" data-target="cicd"><b>22</b>CI/CD</a>
+        <a class="chip" href="#destructive" data-target="destructive"><b>23</b>Removing unused classes &amp; fields</a>
+        <a class="chip" href="#rollback" data-target="rollback"><b>24</b>Rolling back a failing release</a>
       </div>
 
       <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
@@ -463,6 +484,68 @@
 <span class="cm">-- Parent → child: a position with all its candidates</span>
 <span class="kw">SELECT</span> Name, (<span class="kw">SELECT</span> Candidate__r.Name <span class="kw">FROM</span> Job_Applications__r)
 <span class="kw">FROM</span>   Position__c</pre></div>
+      </div>
+    </section>
+
+    <!-- RELATIONSHIP TYPES -->
+    <section class="section" id="relationships">
+      <h2 class="section-title"><span>🧬</span> Object Relationship Types</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>Can you describe the types of connections (relationships) between objects in Salesforce?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Data modeling</span></div>
+          <div class="task-body">
+            <p>"Objects are connected through relationship fields. The main types are <strong>Lookup</strong> (a loose link), <strong>Master-Detail</strong> (a tight link where the parent controls the child), <strong>Many-to-Many</strong> through a junction object, <strong>Self</strong> relationships, the <strong>Hierarchical</strong> relationship (User only), and <strong>External / Indirect lookups</strong> for external objects. Standard objects also use <strong>polymorphic</strong> lookups such as <code>Owner</code> or <code>WhatId</code>, which can point to several object types."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Type</th><th>Link strength</th><th>Parent required?</th><th>Ownership &amp; sharing</th><th>When the parent is deleted</th><th>Roll-up summary</th></tr>
+          <tr><td><strong>Lookup</strong></td><td>Loose</td><td>No (can be made required)</td><td>Child keeps its own owner and sharing</td><td>Field is cleared, or the deletion is blocked (your choice)</td><td>Not natively (use Flow / Apex)</td></tr>
+          <tr><td><strong>Master-Detail</strong></td><td>Tight</td><td>Yes, always</td><td>Child inherits owner, sharing and security from the parent</td><td>Children are deleted (cascade)</td><td>Yes, on the master</td></tr>
+          <tr><td><strong>Many-to-Many</strong></td><td>Via a junction object</td><td>Both parents</td><td>Inherited from the two masters</td><td>Cascade from either parent</td><td>Yes, on both masters</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="card"><div class="card-title">🔁 Self relationship</div><p>A lookup from an object to itself, e.g. <code>Account.ParentId</code> builds an account hierarchy.</p></div>
+          <div class="card"><div class="card-title">👔 Hierarchical</div><p>A special lookup available only on the <strong>User</strong> object, e.g. the user's Manager.</p></div>
+          <div class="card"><div class="card-title">🌍 External lookup</div><p>A child (standard/custom) object pointing to an <strong>external object</strong>; matches on the external object's External ID.</p></div>
+          <div class="card"><div class="card-title">↩️ Indirect lookup</div><p>An <strong>external</strong> child object pointing to a standard/custom parent, matched on a unique External ID field on the parent.</p></div>
+        </div>
+
+        <div class="sub-title">🔀 Polymorphic relationships</div>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:8px;">Fields like <code>Task.WhatId</code>, <code>Task.WhoId</code> and <code>Owner</code> can point to more than one object type. In SOQL use <code>TYPEOF</code> to read different fields per type:</p>
+        <div class="code-wrap"><div class="code-label">TYPEOF</div>
+<pre><span class="kw">SELECT</span> Id, Subject,
+  <span class="kw">TYPEOF</span> What
+    <span class="kw">WHEN</span> Account     <span class="kw">THEN</span> Name, Phone
+    <span class="kw">WHEN</span> Opportunity <span class="kw">THEN</span> Name, Amount
+  <span class="kw">END</span>
+<span class="kw">FROM</span> Task</pre></div>
+
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Choose Master-Detail when…</div>
+            <ul class="checklist">
+              <li>The child makes no sense without the parent</li>
+              <li>You need roll-up summary fields</li>
+              <li>Sharing and ownership should follow the parent</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--orange);">✅ Choose Lookup when…</div>
+            <ul class="checklist">
+              <li>The child can exist on its own or the link is optional</li>
+              <li>The child needs a different owner or sharing</li>
+              <li>You want to avoid cascade deletes</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Conversion rules:</strong> Lookup → Master-Detail only works if every child record already has a parent. Master-Detail → Lookup only works if the parent has no roll-up summary fields on it.</div>
+        </div>
       </div>
     </section>
 
@@ -535,6 +618,46 @@ sf org delete scratch --target-org feature-x</pre>
 
         <div class="alert alert-success"><span class="alert-icon">🎯</span>
           <div><strong>Senior answer:</strong> "I use scratch orgs for feature development and CI because they are disposable and built from Git, and sandboxes for UAT and integration testing — Developer/Developer Pro for development, Partial Copy for QA with sample data, Full for staging and performance tests with production-sized data."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOM SETTINGS vs CUSTOM METADATA -->
+    <section class="section" id="settings">
+      <h2 class="section-title"><span>⚙️</span> Custom Settings vs Custom Metadata</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between custom settings and custom metadata types?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Key idea: data vs metadata</span></div>
+          <div class="task-body">
+            <p>"Both store configuration that code can read without queries on regular objects. The key difference: <strong>custom metadata records are metadata</strong>, so they deploy and package together with the code across environments. <strong>Custom settings records are data</strong>: only the definition deploys, the values must be loaded per org — but they support <strong>hierarchical</strong> values per org, profile or user."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th></th><th>Custom Settings</th><th>Custom Metadata Types</th></tr>
+          <tr><td><strong>Records are…</strong></td><td>Data</td><td>Metadata</td></tr>
+          <tr><td><strong>Deployment</strong></td><td>Definition deploys; values must be loaded in each org</td><td>Definition <em>and</em> records deploy (change sets, packages, CLI)</td></tr>
+          <tr><td><strong>Types</strong></td><td><em>List</em> (name → values) and <em>Hierarchical</em> (org / profile / user level)</td><td>One type; records identified by developer name; can relate to other metadata</td></tr>
+          <tr><td><strong>Per-user / profile values</strong></td><td>Yes (hierarchical)</td><td>No</td></tr>
+          <tr><td><strong>Read in Apex</strong></td><td><code>getInstance()</code>, <code>getOrgDefaults()</code>, <code>getValues()</code></td><td><code>getInstance('DevName')</code>, <code>getAll()</code>, or SOQL</td></tr>
+          <tr><td><strong>Write in Apex</strong></td><td>Normal DML</td><td>Not with DML — use the Metadata API / deploy</td></tr>
+          <tr><td><strong>Formulas, validation rules, Flow</strong></td><td>Hierarchical settings via <code>$Setup</code></td><td>Usable too (e.g. <code>$CustomMetadata</code>)</td></tr>
+          <tr><td><strong>Typical use</strong></td><td>Runtime switches per user/profile (e.g. bypass triggers), values changed by data loads</td><td>Configuration that must travel with the release: mappings, endpoints per environment, rules, feature flags</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Reading both in Apex</div>
+<pre><span class="cm">// Hierarchical custom setting: resolves user → profile → org automatically</span>
+Trigger_Settings__c s = Trigger_Settings__c.getInstance();
+<span class="kw">if</span> (s.Disable_Account_Trigger__c) <span class="kw">return</span>;
+
+<span class="cm">// Custom metadata: deployable configuration</span>
+Integration_Config__mdt cfg = Integration_Config__mdt.getInstance(<span class="str">'ERP'</span>);
+String path = cfg.Endpoint_Path__c;</pre></div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Rule of thumb:</strong> "If the value must be deployed with the code and be the same logic in every org, I use custom metadata. If it must differ per user or profile, or be flipped at runtime by an admin or a data load, I use a hierarchical custom setting."</div>
         </div>
       </div>
     </section>
@@ -691,6 +814,68 @@ Map&lt;Id, Account&gt; accs = <span class="kw">new</span> Map&lt;Id, Account&gt;
               <li>Mixed automation (Flows + triggers) shares one order of execution — document it</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRIGGER FRAMEWORKS & BYPASS -->
+    <section class="section" id="trigfw">
+      <h2 class="section-title"><span>🛠️</span> Trigger Frameworks &amp; Disabling Triggers</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul><li>Tell me about trigger frameworks in Salesforce.</li><li>You are doing a data load in production and some triggers must be disabled during it. How would you do it?</li></ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 What is a trigger framework?</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"A trigger framework standardizes how triggers are structured: <strong>one trigger per object</strong> that delegates to a handler, automatic <strong>dispatch by context</strong>, <strong>recursion control</strong>, a <strong>bypass</strong> mechanism and a predictable <strong>order of execution</strong>. It keeps every developer writing triggers the same way and makes them testable."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Framework</th><th>Idea</th><th>Good for</th></tr>
+          <tr><td><strong>TriggerHandler</strong> (Kevin O'Hara)</td><td>Virtual base class with a method per context; built-in bypass and loop-count control</td><td>Simple, widely known; small and medium orgs</td></tr>
+          <tr><td><strong>Trigger Actions Framework</strong></td><td>Metadata-driven: actions are registered in Custom Metadata and ordered there; bypass flags</td><td>Large orgs where admins or many teams add logic per object</td></tr>
+          <tr><td><strong>fflib / Apex Enterprise Patterns</strong></td><td>Domain, Service, Selector and Unit of Work layers</td><td>Complex domains that need strict separation and testability</td></tr>
+          <tr><td><strong>Home-grown handler</strong></td><td>The base class shown in the previous section</td><td>When requirements are simple</td></tr>
+        </table></div>
+
+        <div class="sub-title">🔌 Disabling triggers during a production data load</div>
+        <div class="table-wrap"><table>
+          <tr><th>Option</th><th>Scope</th><th>Needs a deployment?</th><th>Notes</th></tr>
+          <tr><td><strong>Custom Permission</strong> assigned through a permission set to the load user</td><td>Only that user</td><td>No</td><td>Checked with <code>FeatureManagement.checkPermission()</code>. Safest and auditable: nobody else is affected. <strong>Recommended.</strong></td></tr>
+          <tr><td><strong>Hierarchical Custom Setting</strong></td><td>Per user, profile or whole org</td><td>No (it is data)</td><td>Flip a checkbox for the load user. Easy to forget to switch it back.</td></tr>
+          <tr><td><strong>Custom Metadata flag</strong></td><td>Global</td><td>Yes (metadata deploy)</td><td>Affects every user, and changing it is slow.</td></tr>
+          <tr><td><strong>Deactivate the trigger</strong></td><td>Global</td><td>Yes</td><td>Triggers can't be deactivated from the UI in production; you deploy an inactive version. Last resort.</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Bypass check in the base class</div>
+<pre><span class="kw">public virtual class</span> TriggerHandler {
+
+  <span class="kw">public void</span> run() {
+    <span class="kw">if</span> (isBypassed()) <span class="kw">return</span>;           <span class="cm">// skip everything for the data-load user</span>
+    <span class="kw">switch on</span> Trigger.operationType { <span class="cm">/* … same dispatch as before … */</span> }
+  }
+
+  <span class="kw">private</span> Boolean isBypassed() {
+    <span class="kw">if</span> (FeatureManagement.checkPermission(<span class="str">'Bypass_Triggers'</span>)) <span class="kw">return true</span>;  <span class="cm">// custom permission</span>
+    Trigger_Settings__c s = Trigger_Settings__c.getInstance();                  <span class="cm">// hierarchical setting</span>
+    <span class="kw">return</span> s != <span class="kw">null</span> &amp;&amp; s.Disable_All_Triggers__c == <span class="kw">true</span>;
+  }
+}</pre></div>
+
+        <div class="sub-title">🪜 Safe procedure</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Plan it</strong> <span class="d">— decide which triggers, validation rules and flows must be skipped, and how the skipped logic will be reproduced afterwards (e.g. a batch job).</span></div></div>
+          <div class="step"><div class="step-body"><strong>Scope the bypass to the load user</strong> <span class="d">— assign the permission set with the Custom Permission; avoid global switches.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Run the load</strong> <span class="d">— Bulk API or Data Loader, sensible batch size, after a test run in a sandbox.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Remove the bypass immediately</strong> <span class="d">— unassign the permission set / reset the setting.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Reconcile</strong> <span class="d">— compare counts and key values, then run any follow-up logic and keep an audit trail.</span></div></div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Don't forget the rest of the automation:</strong> use the same Custom Permission in validation rules (<code>NOT($Permission.Bypass_Triggers)</code>) and in Flow entry conditions, so the load isn't blocked by them. Inside a single Apex transaction, frameworks also offer a static <code>bypass('HandlerName')</code> call.</div>
         </div>
       </div>
     </section>
@@ -875,6 +1060,265 @@ Database.SaveResult[] results = Database.insert(accs, <span class="kw">false</sp
       </div>
     </section>
 
+    <!-- BATCH vs QUEUEABLE -->
+    <section class="section" id="asyncapex">
+      <h2 class="section-title"><span>⏳</span> Batch vs Queueable Apex</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between Batch and Queueable Apex?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Async Apex</span></div>
+          <div class="task-body">
+            <p>"<strong>Batch Apex</strong> is built for <strong>large data volumes</strong>: it splits records into chunks, runs each chunk in its own transaction with fresh governor limits, and can process up to 50 million records. <strong>Queueable Apex</strong> is a <strong>lightweight, flexible async job</strong>: it accepts complex parameters, can be chained, and is the natural choice for work started from a trigger or a service — but it processes everything in one transaction."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th></th><th>Batch Apex</th><th>Queueable Apex</th></tr>
+          <tr><td><strong>Interface</strong></td><td><code>Database.Batchable&lt;SObject&gt;</code> — <code>start</code>, <code>execute</code>, <code>finish</code></td><td><code>Queueable</code> — <code>execute</code></td></tr>
+          <tr><td><strong>Best for</strong></td><td>Huge volumes, clean-ups, back-fills, scheduled maintenance</td><td>Trigger-started work, callouts, dependent steps, passing objects around</td></tr>
+          <tr><td><strong>Chunking</strong></td><td>Yes — scope size 1–2000 (default 200)</td><td>No — one execution (chain more jobs for more work)</td></tr>
+          <tr><td><strong>Data source</strong></td><td><code>QueryLocator</code> (up to 50 M records) or an <code>Iterable</code></td><td>Anything passed through the constructor (SObjects, collections, custom types)</td></tr>
+          <tr><td><strong>Governor limits</strong></td><td>Fresh async limits for every chunk</td><td>One async transaction</td></tr>
+          <tr><td><strong>State between steps</strong></td><td><code>Database.Stateful</code> keeps instance variables across chunks</td><td>Instance variables travel with the job object</td></tr>
+          <tr><td><strong>Chaining</strong></td><td>Start another job from <code>finish()</code></td><td>Enqueue one child job from <code>execute()</code></td></tr>
+          <tr><td><strong>Callouts</strong></td><td><code>Database.AllowsCallouts</code></td><td><code>Database.AllowsCallouts</code></td></tr>
+          <tr><td><strong>Scheduling</strong></td><td>Through <code>Schedulable</code> or <code>System.scheduleBatch</code></td><td>Not directly — enqueue it from a <code>Schedulable</code></td></tr>
+          <tr><td><strong>Concurrency</strong></td><td>A few active at once; the rest wait in the Flex Queue</td><td>Up to 50 jobs can be enqueued in one transaction</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="code-wrap" style="margin:0;"><div class="code-label">Batch</div>
+<pre><span class="kw">public class</span> PurgeClosedCasesBatch <span class="kw">implements</span>
+    Database.Batchable&lt;SObject&gt;, Database.Stateful {
+  <span class="kw">public</span> Integer processed = <span class="num">0</span>;
+
+  <span class="kw">public</span> Database.QueryLocator start(Database.BatchableContext bc) {
+    <span class="kw">return</span> Database.getQueryLocator([
+      <span class="kw">SELECT</span> Id <span class="kw">FROM</span> Case
+      <span class="kw">WHERE</span> IsClosed = <span class="kw">true</span> <span class="kw">AND</span> ClosedDate &lt; LAST_N_YEARS:<span class="num">2</span>]);
+  }
+  <span class="kw">public void</span> execute(Database.BatchableContext bc, List&lt;Case&gt; scope) {
+    <span class="kw">delete</span> scope;               <span class="cm">// fresh limits per chunk</span>
+    processed += scope.size();  <span class="cm">// kept thanks to Stateful</span>
+  }
+  <span class="kw">public void</span> finish(Database.BatchableContext bc) {
+    System.debug(processed + <span class="str">' cases purged'</span>);
+  }
+}
+Id jobId = Database.executeBatch(<span class="kw">new</span> PurgeClosedCasesBatch(), <span class="num">200</span>);</pre></div>
+          <div class="code-wrap" style="margin:0;"><div class="code-label">Queueable</div>
+<pre><span class="kw">public class</span> EnrichAccountsJob <span class="kw">implements</span>
+    Queueable, Database.AllowsCallouts {
+  <span class="kw">private</span> List&lt;Id&gt; accountIds;
+  <span class="kw">public</span> EnrichAccountsJob(List&lt;Id&gt; ids) {
+    <span class="kw">this</span>.accountIds = ids;
+  }
+  <span class="kw">public void</span> execute(QueueableContext ctx) {
+    <span class="cm">// callout + DML for these accounts …</span>
+
+    <span class="cm">// chain the next step (only ONE child job is allowed here)</span>
+    <span class="cm">// System.enqueueJob(new SendNotificationsJob(accountIds));</span>
+  }
+}
+Id jobId = System.enqueueJob(<span class="kw">new</span> EnrichAccountsJob(ids));</pre></div>
+        </div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "If I need to touch thousands or millions of records, I use Batch for its chunking and per-chunk limits. If I need to run something asynchronously from a trigger or a service, with complex inputs, callouts or a chain of dependent steps, I use Queueable."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOM BATCH RETRY -->
+    <section class="section" id="batchretry">
+      <h2 class="section-title"><span>🔁</span> Custom Retry Mechanism for a Batch</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>You have a batch and you need a custom retry mechanism. How would you build it?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Resilience</span></div>
+          <div class="task-body">
+            <p>"Batch Apex has no built-in retry, so I build it around three ideas: <strong>capture</strong> the records that failed (per record, with <code>Database.Stateful</code> or a log object), <strong>classify</strong> the error as transient or permanent, and in <code>finish()</code> <strong>re-launch a batch only for the failed Ids</strong> with an attempt counter, exponential back-off and a maximum number of attempts. For failures I can't catch — like limit exceptions — I use <code>BatchApexErrorEvent</code>."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Retry with back-off</div>
+<pre><span class="kw">public class</span> SyncAccountsBatch <span class="kw">implements</span> Database.Batchable&lt;SObject&gt;, Database.Stateful,
+                                          Database.AllowsCallouts, Database.RaisesPlatformEvents {
+  <span class="kw">private static final</span> Integer MAX_ATTEMPTS = <span class="num">3</span>;
+  <span class="kw">private</span> Set&lt;Id&gt; onlyIds;                          <span class="cm">// null on the first run</span>
+  <span class="kw">private</span> Integer attempt;
+  <span class="kw">private</span> Set&lt;Id&gt; failedIds = <span class="kw">new</span> Set&lt;Id&gt;();       <span class="cm">// survives between chunks (Stateful)</span>
+
+  <span class="kw">public</span> SyncAccountsBatch() { <span class="kw">this</span>(<span class="kw">null</span>, <span class="num">1</span>); }
+  <span class="kw">public</span> SyncAccountsBatch(Set&lt;Id&gt; ids, Integer attempt) { <span class="kw">this</span>.onlyIds = ids; <span class="kw">this</span>.attempt = attempt; }
+
+  <span class="kw">public</span> Database.QueryLocator start(Database.BatchableContext bc) {
+    String soql = <span class="str">'SELECT Id, Name FROM Account WHERE Needs_Sync__c = true'</span>;
+    <span class="kw">if</span> (onlyIds != <span class="kw">null</span>) soql += <span class="str">' AND Id IN :onlyIds'</span>;      <span class="cm">// retries only the failed Ids</span>
+    <span class="kw">return</span> Database.getQueryLocator(soql);
+  }
+
+  <span class="kw">public void</span> execute(Database.BatchableContext bc, List&lt;Account&gt; scope) {
+    <span class="kw">for</span> (Account a : scope) {
+      <span class="kw">try</span> {
+        ErpClient.push(a);                                  <span class="cm">// callout</span>
+      } <span class="kw">catch</span> (ErpClient.TransientException e) {         <span class="cm">// timeouts, 5xx, row locks…</span>
+        failedIds.add(a.Id);
+      } <span class="kw">catch</span> (Exception e) {
+        <span class="cm">// permanent error → log it, do NOT retry</span>
+      }
+    }
+  }
+
+  <span class="kw">public void</span> finish(Database.BatchableContext bc) {
+    <span class="kw">if</span> (failedIds.isEmpty()) <span class="kw">return</span>;
+    <span class="kw">if</span> (attempt &lt; MAX_ATTEMPTS) {
+      Integer delayMinutes = <span class="num">5</span> * (Integer) Math.pow(<span class="num">2</span>, attempt - <span class="num">1</span>);   <span class="cm">// 5, 10, 20 … (exponential back-off)</span>
+      System.scheduleBatch(<span class="kw">new</span> SyncAccountsBatch(failedIds, attempt + <span class="num">1</span>),
+                           <span class="str">'SyncAccounts retry #'</span> + (attempt + <span class="num">1</span>), delayMinutes, <span class="num">50</span>);
+    } <span class="kw">else</span> {
+      <span class="cm">// out of attempts → store the Ids in a "Failed_Sync__c" object and alert the team</span>
+    }
+  }
+}</pre></div>
+
+        <div class="sub-title">🛟 Catching what try/catch can't: BatchApexErrorEvent</div>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:8px;">A limit exception can't be caught inside <code>execute()</code>. If the batch implements <code>Database.RaisesPlatformEvents</code>, Salesforce publishes a <code>BatchApexErrorEvent</code> for the failed chunk, and a trigger can react to it:</p>
+        <div class="code-wrap"><div class="code-label">Subscriber</div>
+<pre><span class="kw">trigger</span> BatchErrorTrigger <span class="kw">on</span> BatchApexErrorEvent (<span class="kw">after insert</span>) {
+  <span class="kw">for</span> (BatchApexErrorEvent e : Trigger.new) {
+    <span class="cm">// JobScope = comma-separated Ids of the chunk that failed (even on LIMIT exceptions)</span>
+    Set&lt;Id&gt; failed = <span class="kw">new</span> Set&lt;Id&gt;();
+    <span class="kw">for</span> (String s : e.JobScope.split(<span class="str">','</span>)) failed.add(Id.valueOf(s.trim()));
+    <span class="cm">// log e.ExceptionType / e.Message, then re-enqueue the failed Ids with attempt control</span>
+  }
+}</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Design checklist</div>
+            <ul class="checklist">
+              <li>Make the processing <strong>idempotent</strong> (safe to run twice)</li>
+              <li>Cap the attempts and use <strong>exponential back-off</strong></li>
+              <li>Retry only <strong>transient</strong> errors; send permanent ones to a log</li>
+              <li>Persist retry state (custom object) if it must survive for hours</li>
+              <li>Alert when attempts are exhausted</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ Pitfalls</div>
+            <ul class="crosslist">
+              <li>Retrying the <em>whole</em> batch instead of just the failed Ids</li>
+              <li>Infinite retry loops (no maximum)</li>
+              <li>Huge <code>Database.Stateful</code> collections blowing the heap</li>
+              <li>Running two retries of the same job at once</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTING INTEGRATIONS -->
+    <section class="section" id="testcallout">
+      <h2 class="section-title"><span>🧪</span> Testing Classes with External Integrations</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>How can you write tests for a class that has an external integration? How do you write the test?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Testing</span></div>
+          <div class="task-body">
+            <p>"Apex tests <strong>can't make real callouts</strong>, so I <strong>mock</strong> the external system. I implement <code>HttpCalloutMock</code> (or use <code>StaticResourceCalloutMock</code>), register it with <code>Test.setMock()</code> before the code under test runs, wrap the call in <code>Test.startTest()</code> / <code>Test.stopTest()</code>, and assert the real outcome. I cover the <strong>success path and the error paths</strong> (500, 400, malformed JSON, exceptions), and I verify that the request was built correctly."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">HttpCalloutMock + Queueable</div>
+<pre><span class="ann">@IsTest</span>
+<span class="kw">private class</span> SyncOpportunityJobTest {
+
+  <span class="kw">public class</span> ErpMock <span class="kw">implements</span> HttpCalloutMock {
+    <span class="kw">private</span> Integer status;
+    <span class="kw">public</span> ErpMock(Integer status) { <span class="kw">this</span>.status = status; }
+
+    <span class="kw">public</span> HttpResponse respond(HttpRequest req) {
+      System.assertEquals(<span class="str">'POST'</span>, req.getMethod());                   <span class="cm">// verify the request we built</span>
+      System.assert(req.getEndpoint().startsWith(<span class="str">'callout:ERP_API'</span>));
+      HttpResponse res = <span class="kw">new</span> HttpResponse();
+      res.setStatusCode(status);
+      res.setHeader(<span class="str">'Content-Type'</span>, <span class="str">'application/json'</span>);
+      res.setBody(status == <span class="num">200</span> ? <span class="str">'{"status":"ok"}'</span> : <span class="str">'{"error":"boom"}'</span>);
+      <span class="kw">return</span> res;
+    }
+  }
+
+  <span class="ann">@TestSetup</span>
+  <span class="kw">static void</span> setup() {
+    <span class="kw">insert new</span> Opportunity(Name = <span class="str">'Test'</span>, StageName = <span class="str">'Prospecting'</span>, CloseDate = Date.today().addDays(<span class="num">30</span>));
+  }
+
+  <span class="ann">@IsTest</span>
+  <span class="kw">static void</span> success_path() {
+    Opportunity opp = [<span class="kw">SELECT</span> Id <span class="kw">FROM</span> Opportunity <span class="kw">LIMIT</span> <span class="num">1</span>];
+    Test.setMock(HttpCalloutMock.<span class="kw">class</span>, <span class="kw">new</span> ErpMock(<span class="num">200</span>));   <span class="cm">// BEFORE the call</span>
+    Test.startTest();
+    System.enqueueJob(<span class="kw">new</span> SyncOpportunityJob(<span class="kw">new</span> Set&lt;Id&gt;{ opp.Id }));
+    Test.stopTest();                                       <span class="cm">// the async job has finished here</span>
+    <span class="cm">// assert the real outcome: log record created, status field updated…</span>
+  }
+
+  <span class="ann">@IsTest</span>
+  <span class="kw">static void</span> server_error_is_handled() {
+    Opportunity opp = [<span class="kw">SELECT</span> Id <span class="kw">FROM</span> Opportunity <span class="kw">LIMIT</span> <span class="num">1</span>];
+    Test.setMock(HttpCalloutMock.<span class="kw">class</span>, <span class="kw">new</span> ErpMock(<span class="num">500</span>));
+    Test.startTest();
+    System.enqueueJob(<span class="kw">new</span> SyncOpportunityJob(<span class="kw">new</span> Set&lt;Id&gt;{ opp.Id }));
+    Test.stopTest();
+    <span class="cm">// assert the failure was logged / retried and nothing was corrupted</span>
+  }
+}</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🧰 Tools in your belt</div>
+            <ul class="checklist">
+              <li><code>HttpCalloutMock</code> — custom logic and assertions in <code>respond()</code></li>
+              <li><code>StaticResourceCalloutMock</code> / <code>MultiStaticResourceCalloutMock</code> — canned JSON from static resources</li>
+              <li><code>WebServiceMock</code> — for SOAP callouts</li>
+              <li><code>Test.startTest()/stopTest()</code> — runs queueable, future and batch jobs to completion</li>
+              <li><code>@TestSetup</code> — shared data for all test methods</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">🏗️ Design for testability</div>
+            <ul class="checklist">
+              <li>Isolate the callout in a small <strong>client class</strong> behind an interface</li>
+              <li>Inject it so unit tests of business logic need no HTTP at all</li>
+              <li>Use <code>Test.createStub()</code> with <code>System.StubProvider</code> to fake dependencies</li>
+              <li>Named Credentials are fine in tests — the mock answers instead</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Stubbing a dependency</div>
+<pre><span class="kw">public interface</span> IErpClient { <span class="kw">void</span> push(Id oppId); }
+
+<span class="ann">@IsTest</span>
+<span class="kw">private class</span> ErpStub <span class="kw">implements</span> System.StubProvider {
+  <span class="kw">public</span> Object handleMethodCall(Object stub, String method, Type returnType,
+                                 List&lt;Type&gt; paramTypes, List&lt;String&gt; paramNames, List&lt;Object&gt; args) {
+    <span class="kw">return null</span>;   <span class="cm">// behave like the real client, without any callout</span>
+  }
+}
+<span class="cm">// in a test:</span>
+IErpClient fake = (IErpClient) Test.createStub(IErpClient.<span class="kw">class</span>, <span class="kw">new</span> ErpStub());</pre></div>
+
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
+          <div><strong>Avoid:</strong> branching production code on <code>Test.isRunningTest()</code> to skip callouts, and tests with no assertions written only to reach the 75% coverage required for deployment. Coverage is a minimum, not the goal.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- CONNECTED APP vs NAMED CREDENTIAL -->
     <section class="section" id="capps">
       <h2 class="section-title"><span>🔑</span> Connected App vs Named Credential</h2>
@@ -990,6 +1434,67 @@ Database.SaveResult sr = EventBus.publish(evt);
 
         <div class="alert alert-success"><span class="alert-icon">🎯</span>
           <div><strong>Senior answer:</strong> "I use platform events to decouple processes — for example publishing an event from a trigger and letting a subscriber make the callout, which keeps the save fast, allows multiple consumers, and gives me replay and retry for resilience."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRIGGER → LWC -->
+    <section class="section" id="triglwc">
+      <h2 class="section-title"><span>⚛️</span> Connecting a Trigger to an LWC</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>How can we connect a trigger to an LWC component?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-blue">Architecture</span></div>
+          <div class="task-body">
+            <p>"A trigger runs on the server during a DML operation and an LWC runs in the browser, so there is <strong>no direct connection</strong>. I connect them through the <strong>event bus</strong>: the trigger (or its handler) publishes a <strong>Platform Event</strong>, and the LWC subscribes to it with <code>lightning/empApi</code> to update the UI in real time. If the data simply changes, <strong>Change Data Capture</strong> gives me the same without writing any publishing code."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Approach</th><th>How it works</th><th>Use when</th></tr>
+          <tr><td><strong>Platform Event + empApi</strong></td><td>Handler publishes <code>EventBus.publish()</code>; LWC subscribes to <code>/event/My_Event__e</code></td><td>Real-time notification with a custom payload (<em>OrderShipped</em>)</td></tr>
+          <tr><td><strong>Change Data Capture + empApi</strong></td><td>Enable CDC for the object; LWC subscribes to <code>/data/AccountChangeEvent</code></td><td>UI should react to any record change, no custom publishing code</td></tr>
+          <tr><td><strong>LWC → Apex → DML (synchronous)</strong></td><td>The LWC calls an Apex method; the DML fires the trigger in that same transaction; results and <code>addError()</code> messages return to the LWC</td><td>The user triggered the change themselves and needs immediate feedback</td></tr>
+          <tr><td><strong>Refresh after a change</strong></td><td><code>refreshApex()</code> for wired Apex, <code>notifyRecordUpdateAvailable()</code> for Lightning Data Service</td><td>The component must re-read data after a known server-side change</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="code-wrap" style="margin:0;"><div class="code-label">Apex (handler)</div>
+<pre><span class="kw">protected override void</span> afterUpdate() {
+  List&lt;Order_Shipped__e&gt; events = <span class="kw">new</span> List&lt;Order_Shipped__e&gt;();
+  <span class="kw">for</span> (Order o : (List&lt;Order&gt;) Trigger.new) {
+    <span class="kw">if</span> (o.Status == <span class="str">'Shipped'</span>) {
+      events.add(<span class="kw">new</span> Order_Shipped__e(
+        Order_Number__c = o.OrderNumber,
+        Status__c       = o.Status));
+    }
+  }
+  <span class="kw">if</span> (!events.isEmpty()) EventBus.publish(events);
+}</pre></div>
+          <div class="code-wrap" style="margin:0;"><div class="code-label">LWC (JavaScript)</div>
+<pre><span class="kw">import</span> { LightningElement } <span class="kw">from</span> <span class="str">'lwc'</span>;
+<span class="kw">import</span> { subscribe, unsubscribe, onError } <span class="kw">from</span> <span class="str">'lightning/empApi'</span>;
+
+<span class="kw">export default class</span> OrderStatus <span class="kw">extends</span> LightningElement {
+  channelName = <span class="str">'/event/Order_Shipped__e'</span>;
+  subscription = {};
+  status;
+
+  connectedCallback() {
+    subscribe(<span class="kw">this</span>.channelName, -<span class="num">1</span>, (message) =&gt; {
+      <span class="kw">this</span>.status = message.data.payload.Status__c;
+    }).then((response) =&gt; { <span class="kw">this</span>.subscription = response; });
+    onError((error) =&gt; console.error(<span class="str">'EMP API error'</span>, error));
+  }
+  disconnectedCallback() {
+    unsubscribe(<span class="kw">this</span>.subscription, () =&gt; {});
+  }
+}</pre></div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Details to mention:</strong> <code>-1</code> means "only new events" (<code>-2</code> replays all retained events); users need read access to the event for the LWC to receive it; and the event is published after the transaction commits by default, so the UI never hears about data that was rolled back.</div>
         </div>
       </div>
     </section>
@@ -1298,10 +1803,98 @@ Database.SaveResult sr = EventBus.publish(evt);
       </div>
     </section>
 
+    <!-- CI/CD -->
+    <section class="section" id="cicd">
+      <h2 class="section-title"><span>🚀</span> CI/CD</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul>
+          <li>What can you tell me about CI/CD? What does it mean for you?</li>
+          <li>What do you use it for, and how do you use it?</li>
+          <li>How is it built in your project?</li>
+        </ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Definition in your own words</div><span class="badge b-blue">Core Concept</span></div>
+          <div class="task-body">
+            <p>"<strong>Continuous Integration</strong> means every change is merged often into a shared branch and <strong>automatically built, analyzed and tested</strong>, so problems are found within minutes. <strong>Continuous Delivery</strong> means the code is always in a deployable state and moves through environments with a repeatable, automated pipeline; <strong>Continuous Deployment</strong> goes one step further and releases to production automatically. On Salesforce, Git holds the metadata as the <strong>source of truth</strong> and the pipeline validates and deploys it between orgs."</p>
+          </div>
+        </div>
+
+        <div class="sub-title">🔄 A typical Salesforce pipeline</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Develop</strong> <span class="d">in a scratch org or developer sandbox, commit to a feature branch and open a pull request.</span></div></div>
+          <div class="step"><div class="step-body"><strong>CI on every pull request</strong> <span class="d">— static analysis (Salesforce Code Analyzer / PMD, ESLint, Prettier), LWC Jest tests, and a <strong>validate-only (check-only) deployment</strong> that runs the Apex tests. A failing check blocks the merge.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Merge → automatic deploy</strong> <span class="d">to an integration / QA sandbox, usually deploying only the <em>delta</em> (changed components) and running smoke tests.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Promote</strong> <span class="d">to UAT / staging (Full sandbox) for regression, performance and business sign-off.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Release to production</strong> <span class="d">— validate in production ahead of the window, then run a <strong>Quick Deploy</strong> of the validated package (valid for 10 days) so the release itself is fast.</span></div></div>
+          <div class="step"><div class="step-body"><strong>After the release</strong> <span class="d">— smoke test, tag the release in Git, notify the team and monitor errors.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">GitHub Actions — validate every PR</div>
+<pre><span class="kw">name</span>: PR validation
+<span class="kw">on</span>:
+  <span class="kw">pull_request</span>:
+    <span class="kw">branches</span>: [ main ]
+
+<span class="kw">jobs</span>:
+  <span class="kw">validate</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+        <span class="kw">with</span>: { fetch-depth: 0 }
+      - <span class="kw">run</span>: npm install --global @salesforce/cli
+      - <span class="kw">run</span>: npm ci &amp;&amp; npm run test:unit        <span class="cm"># LWC Jest tests</span>
+      <span class="cm"># static analysis (Salesforce Code Analyzer / PMD / ESLint) goes here</span>
+      - <span class="kw">name</span>: Authenticate to the QA sandbox (JWT)
+        <span class="kw">run</span>: |
+          echo "${{ secrets.SF_SERVER_KEY }}" &gt; server.key
+          sf org login jwt --client-id ${{ secrets.SF_CLIENT_ID }} \
+            --jwt-key-file server.key --username ${{ secrets.SF_USERNAME }} \
+            --instance-url https://test.salesforce.com --alias qa
+      - <span class="kw">name</span>: Validate only (no deploy) and run Apex tests
+        <span class="kw">run</span>: sf project deploy validate --source-dir force-app --test-level RunLocalTests --target-org qa</pre></div>
+
+        <div class="code-wrap"><div class="code-label">Production release</div>
+<pre><span class="cm"># 1. Validate in production ahead of the release window (runs the tests)</span>
+sf project deploy validate --manifest manifest/package.xml --test-level RunLocalTests --target-org prod
+
+<span class="cm"># 2. In the window, deploy the already-validated package without re-running tests</span>
+sf project deploy quick --job-id &lt;validated-job-id&gt; --target-org prod</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🧰 Tools you can name</div>
+            <ul class="checklist">
+              <li><strong>Source control:</strong> GitHub, GitLab, Bitbucket, Azure Repos</li>
+              <li><strong>Pipelines:</strong> GitHub Actions, GitLab CI, Jenkins, Azure DevOps, CircleCI</li>
+              <li><strong>Salesforce:</strong> Salesforce CLI (<code>sf</code>), DevOps Center, sfdx-git-delta for delta packages</li>
+              <li><strong>Commercial DevOps:</strong> Copado, Gearset, Flosum, AutoRABIT</li>
+              <li><strong>Quality:</strong> Code Analyzer / PMD, ESLint, Prettier, Jest</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">🧪 Things worth knowing</div>
+            <ul class="checklist">
+              <li>Test levels: <code>RunSpecifiedTests</code>, <code>RunLocalTests</code>, <code>RunAllTestsInOrg</code></li>
+              <li>Production deployments with Apex require tests and at least 75% coverage</li>
+              <li>Secrets live in the CI secret store; CLI auth via JWT or an External Client App</li>
+              <li>Branching model: trunk-based or GitFlow, mapped to environments</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">🗣️</span>
+          <div><strong>"How is it built in your project?" — answer template.</strong> Describe <em>your real</em> setup in this order: "We keep the metadata in <strong>[Git host]</strong> with <strong>[branching model]</strong>. On every pull request <strong>[pipeline tool]</strong> runs <strong>[static analysis, Jest]</strong> and a check-only deployment with <strong>[test level]</strong>. Merges to <strong>[branch]</strong> deploy to <strong>[QA sandbox]</strong>, then <strong>[UAT]</strong>, and we release to production with a <strong>[validated quick deploy]</strong>. Rollback is <strong>[revert in Git + redeploy]</strong>." Never invent a setup you haven't used — interviewers follow up with "why".</div>
+        </div>
+      </div>
+    </section>
+
     <!-- GIT -->
     <section class="section" id="git">
-      <h2 class="section-title"><span>🌿</span> Git Pull vs Git Fetch</h2>
-      <div class="qbox"><div class="qlabel">Question asked</div><p>What is the difference between git pull and git fetch?</p></div>
+      <h2 class="section-title"><span>🌿</span> Pull, Fetch, Merge &amp; Rebase</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>What do git pull, fetch, merge and rebase do, and how are they different?</p></div>
       <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
       <div class="answer-zone">
         <div class="task-box">
@@ -1338,8 +1931,181 @@ git pull --rebase         <span class="cm"># fetch + rebase (linear history)</sp
           </div>
         </div>
 
+        <div class="sub-title">🔀 Merge vs Rebase</div>
+        <div class="code-wrap"><div class="code-label">Same goal, different history</div>
+<pre>        A───B───C           main
+             \
+              D───E         feature
+
+git merge main  (on feature)        git rebase main  (on feature)
+        A───B───C                          A───B───C
+             \   \                                  \
+              D───E───M                              D'──E'
+ keeps both histories + a merge commit M    D' and E' are NEW commits → linear history</pre></div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Command</th><th>What it does</th><th>Rewrites history?</th><th>Typical use</th></tr>
+          <tr><td><code>fetch</code></td><td>Downloads remote commits and refs; leaves your files and branches untouched</td><td>No</td><td>Look before you integrate</td></tr>
+          <tr><td><code>pull</code></td><td><code>fetch</code> + <code>merge</code> (default) or <code>fetch</code> + <code>rebase</code> (<code>--rebase</code>)</td><td>Depends on the mode</td><td>Update your current branch</td></tr>
+          <tr><td><code>merge</code></td><td>Joins another branch into the current one, creating a merge commit (or a fast-forward when possible)</td><td>No — only adds commits, true chronology is preserved</td><td>Integrating finished work into shared branches (PR merge)</td></tr>
+          <tr><td><code>rebase</code></td><td>Replays your commits on top of another base, creating <strong>new commits</strong> (new SHAs)</td><td><strong>Yes</strong></td><td>Updating or cleaning <em>your own</em> feature branch before a PR; <code>rebase -i</code> to squash/reword</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Commands</div>
+<pre>git fetch origin
+git merge origin/main        <span class="cm"># integrate with a merge commit</span>
+git rebase origin/main       <span class="cm"># or replay your commits on top of main</span>
+git rebase -i HEAD~4         <span class="cm"># interactive: squash / reword / reorder</span>
+
+git merge --abort            <span class="cm"># bail out of a conflicted merge</span>
+git rebase --abort           <span class="cm"># bail out of a conflicted rebase</span>
+git rebase --continue        <span class="cm"># after resolving the conflicts</span></pre></div>
+
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
+          <div><strong>Golden rule:</strong> never rebase commits that other people have already pulled (shared branches like <code>main</code>). Rebase your <em>own</em> local feature branch; merge into shared ones. If you rebase a branch you already pushed, you need <code>git push --force-with-lease</code>.</div>
+        </div>
+
         <div class="alert alert-info"><span class="alert-icon">💡</span>
-          <div><strong>Salesforce angle:</strong> in a source-driven workflow, Git is the source of truth. Fetch before deploying to a scratch org, and expect merge conflicts in metadata XML (profiles, flows, layouts) — resolve them carefully and re-deploy to validate.</div>
+          <div><strong>Salesforce angle:</strong> in a source-driven workflow, Git is the source of truth. Rebase your feature branch on the latest <code>main</code> before the pull request to reduce conflicts, and expect conflicts in metadata XML (profiles, flows, layouts) — resolve them carefully and re-validate the deployment afterwards.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REMOVING UNUSED METADATA -->
+    <section class="section" id="destructive">
+      <h2 class="section-title"><span>🧹</span> Removing Unused Classes &amp; Fields</h2>
+      <div class="qbox"><div class="qlabel">Scenario asked</div>
+        <p>During a refactoring you realize some classes and fields are no longer needed and must be removed from production and the other environments. How would you do it?</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Careful change</span></div>
+          <div class="task-body">
+            <p>"I never delete metadata by hand in each org. I first <strong>analyze the dependencies</strong>, <strong>deprecate</strong> the components in a release, <strong>back up</strong> data and metadata, remove the references from code and automation, and then delete the components with a <strong>destructive changes deployment</strong> through the same pipeline: sandboxes first, production last, with a validation before every step."</p>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Find every dependency</strong> <span class="d">— the "Where is this used?" button on a field, the Tooling API (<code>MetadataComponentDependency</code>), and a text search of the repo for API names. Check Apex (including <em>strings</em> and dynamic SOQL), Flows, validation rules, formulas, reports, layouts, permission sets/profiles, LWC/Aura and external integrations that use the field.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Deprecate first</strong> <span class="d">— stop writing to it, remove it from layouts and flows, hide it with FLS, and watch production for a release cycle.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Back up</strong> <span class="d">— export the field data (Bulk API / Data Loader), retrieve a metadata snapshot and tag the release in Git.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Remove the references</strong> <span class="d">— update Apex, tests and automation, and deploy that change first.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Delete with destructive changes</strong> <span class="d">— list the components in <code>destructiveChangesPost.xml</code> (deleted <em>after</em> the main deploy) or <code>destructiveChangesPre.xml</code> (deleted <em>before</em> it), with an empty <code>package.xml</code>.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Promote through the environments</strong> <span class="d">— validate in a sandbox, then QA → UAT → production, running tests each time. Delete the related test classes too.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Clean up</strong> <span class="d">— remove the files from the repo (<code>git rm</code>), verify in production and document it.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">manifest/destructiveChangesPost.xml</div>
+<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Package xmlns="http://soap.sforce.com/2006/04/metadata"&gt;
+  &lt;types&gt;
+    &lt;members&gt;LegacyPricingService&lt;/members&gt;
+    &lt;members&gt;LegacyPricingServiceTest&lt;/members&gt;
+    &lt;name&gt;ApexClass&lt;/name&gt;
+  &lt;/types&gt;
+  &lt;types&gt;
+    &lt;members&gt;Account.Legacy_Region__c&lt;/members&gt;
+    &lt;name&gt;CustomField&lt;/name&gt;
+  &lt;/types&gt;
+  &lt;version&gt;66.0&lt;/version&gt;   &lt;!-- use your project's API version --&gt;
+&lt;/Package&gt;</pre></div>
+
+        <div class="code-wrap"><div class="code-label">manifest/package.xml (empty) + deploy</div>
+<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Package xmlns="http://soap.sforce.com/2006/04/metadata"&gt;
+  &lt;version&gt;66.0&lt;/version&gt;
+&lt;/Package&gt;
+
+sf project deploy start --manifest manifest/package.xml \
+  --post-destructive-changes manifest/destructiveChangesPost.xml \
+  --test-level RunLocalTests --target-org prod</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">🧩 Good to know</div>
+            <ul class="checklist">
+              <li>Apex classes and triggers can't be deleted from the UI in production, and change sets can't delete components — destructive changes (Metadata API / CLI) can</li>
+              <li>A field can't be deleted while other metadata still references it; the deployment error lists what blocks it</li>
+              <li>Deleted custom fields stay recoverable in the recycle bin for 15 days, unless purged</li>
+              <li>Components from managed packages can't be deleted</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ Risks to call out</div>
+            <ul class="crosslist">
+              <li>Deleting a field deletes its data — irreversible once purged</li>
+              <li>An integration or report still using the field breaks silently</li>
+              <li>Deploying the deletion before the code that stops using it</li>
+              <li>Forgetting the test classes that reference the deleted class</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROLLBACK -->
+    <section class="section" id="rollback">
+      <h2 class="section-title"><span>⏪</span> Rolling Back a Failing Release</h2>
+      <div class="qbox"><div class="qlabel">Scenario asked</div>
+        <p>Your code is already in production and you see that it is failing. How can you roll back the code?</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="alert alert-danger"><span class="alert-icon">🚨</span>
+          <div><strong>Key fact:</strong> Salesforce has no "undo deployment" button. A rollback is a <strong>forward deployment of the previous known-good state</strong> — and it only covers metadata, not data.</div>
+        </div>
+
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Incident response</span></div>
+          <div class="task-body">
+            <p>"First I <strong>stop the damage</strong> with a kill switch — a feature flag, a custom permission, deactivating the flow or trigger logic — without waiting for a deployment. Then I <strong>roll back through the pipeline</strong>: revert the release commit in Git, or redeploy the previous release tag, validate it and deploy to production. Anything the bad release <em>added</em> needs a destructive change, and any <em>data</em> it corrupted needs a separate fix from a backup."</p>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Triage</strong> <span class="d">— confirm the failure matches the release (debug logs, Apex exception emails, Setup Audit Trail, deployment history) and measure the blast radius.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Mitigate immediately</strong> <span class="d">— flip the feature flag / bypass, reactivate the previous Flow version, disable the scheduled job or validation rule.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Choose: roll back or fix forward</strong> <span class="d">— roll back if the cause is unclear or the fix is large; fix forward through a hotfix branch if the fix is tiny and safe.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Roll back via Git + pipeline</strong> <span class="d">— revert the merge commit, let the pipeline validate and deploy it (or redeploy the previous tag).</span></div></div>
+          <div class="step"><div class="step-body"><strong>Remove what was added</strong> <span class="d">— new classes, fields or flows are deleted with destructive changes.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Repair data and follow up</strong> <span class="d">— restore or correct affected records, verify, communicate, and write a post-mortem.</span></div></div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Revert and redeploy</div>
+<pre><span class="cm"># revert the release merge on main; the pipeline validates and deploys it</span>
+git revert -m 1 &lt;merge-commit-sha&gt;
+git push origin main
+
+<span class="cm"># components the bad release ADDED must be removed explicitly</span>
+sf project deploy start --manifest manifest/package.xml \
+  --post-destructive-changes manifest/destructiveChangesPost.xml \
+  --test-level RunLocalTests --target-org prod</pre></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Prepare before the release</div>
+            <ul class="checklist">
+              <li>Tag every release in Git and keep the artifact</li>
+              <li>Retrieve a metadata snapshot of production before deploying</li>
+              <li>Ship risky features behind a feature flag (Custom Metadata / Custom Permission)</li>
+              <li>Write the rollback plan into the release checklist</li>
+              <li>Validate first, deploy in a low-traffic window, monitor right after</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--orange);">⚠️ What does not roll back by itself</div>
+            <ul class="checklist">
+              <li><strong>Data</strong> changed by the faulty code</li>
+              <li><strong>New components</strong> the release created</li>
+              <li><strong>Manual changes</strong> made directly in production</li>
+              <li>Note: a <em>failed</em> deployment is all-or-nothing, so production is never left half-deployed</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "I mitigate first with a feature flag, then revert the release commit in Git and redeploy through the pipeline. I remove new components with destructive changes, repair data from backups, and I make rollback easy up front with release tags, pre-deployment snapshots and feature flags."</div>
         </div>
       </div>
     </section>
@@ -1361,9 +2127,19 @@ git pull --rebase         <span class="cm"># fetch + rebase (linear history)</sp
         <tr><td>9</td><td>Parent levels</td><td>Up to 5 levels child-to-parent in one SOQL field path.</td></tr>
         <tr><td>10</td><td>Security</td><td>CRUD/FLS via profiles &amp; permission sets; records via OWD, role hierarchy, sharing rules; Apex runs in system mode by default.</td></tr>
         <tr><td>11</td><td>insert vs Database.insert</td><td>All-or-nothing with exception vs optional partial success with <code>SaveResult</code>.</td></tr>
-        <tr><td>12</td><td>Pull vs fetch</td><td>Fetch only downloads; pull = fetch + merge (or rebase).</td></tr>
+        <tr><td>12</td><td>Pull / fetch / merge / rebase</td><td>Fetch downloads only; pull = fetch + merge (or rebase); merge joins histories with a merge commit; rebase replays commits for a linear history — never on shared branches.</td></tr>
         <tr><td>13</td><td>Platform events</td><td>Pub/sub messaging: <code>EventBus.publish</code>; subscribe with trigger/Flow/LWC/CometD; 72 h retention with replay ID.</td></tr>
         <tr><td>14</td><td>Query hidden fields</td><td>System mode (no USER_MODE), <code>with sharing</code>, return only the computed result or <code>stripInaccessible</code>.</td></tr>
+        <tr><td>15</td><td>Relationship types</td><td>Lookup, Master-Detail, Many-to-Many (junction), Self, Hierarchical (User), External and Indirect lookups, plus polymorphic fields.</td></tr>
+        <tr><td>16</td><td>Custom settings vs custom metadata</td><td>Metadata records deploy and package with the code; settings are data, but support hierarchical per-user/profile values and DML.</td></tr>
+        <tr><td>17</td><td>Disable triggers in a data load</td><td>Framework bypass via a Custom Permission (or hierarchical setting) assigned to the load user; deactivating a trigger in production needs a deployment.</td></tr>
+        <tr><td>18</td><td>Batch vs Queueable</td><td>Batch: huge volumes in chunks (QueryLocator up to 50 M). Queueable: flexible, complex params, chaining, trigger-friendly.</td></tr>
+        <tr><td>19</td><td>Batch retry</td><td>Collect failed Ids, relaunch in <code>finish()</code> with <code>scheduleBatch</code>, back-off and max attempts; <code>BatchApexErrorEvent</code> for uncatchable failures.</td></tr>
+        <tr><td>20</td><td>Testing integrations</td><td><code>HttpCalloutMock</code> + <code>Test.setMock</code>, <code>startTest/stopTest</code>, test success and error paths, inject interfaces and use <code>Test.createStub</code>.</td></tr>
+        <tr><td>21</td><td>Trigger → LWC</td><td>No direct link: publish a Platform Event (or use CDC) and subscribe with <code>lightning/empApi</code>; LWC → Apex → DML returns <code>addError()</code> messages.</td></tr>
+        <tr><td>22</td><td>CI/CD</td><td>Git + pipeline: PR validation (analysis, Jest, check-only deploy with tests) → sandboxes → UAT → validated Quick Deploy to production.</td></tr>
+        <tr><td>23</td><td>Remove unused metadata</td><td>Analyze dependencies, deprecate, back up, remove references, then destructive changes through every environment.</td></tr>
+        <tr><td>24</td><td>Rollback</td><td>No undo button: kill switch first, then revert in Git and redeploy; new components need destructive changes; data needs its own fix.</td></tr>
       </table></div>
     </section>
 
@@ -1389,8 +2165,8 @@ git pull --rebase         <span class="cm"># fetch + rebase (linear history)</sp
             <li>Mixing up connected apps (inbound) and named credentials (outbound)</li>
             <li>Putting SOQL or DML inside loops in any example</li>
             <li>Claiming Apex enforces field-level security by default — it doesn't</li>
+            <li>Describing a CI/CD setup you haven't actually used</li>
             <li>Guessing numbers; say "I'd verify the exact limit in the docs" instead</li>
-            <li>Writing queries in the chat without testing the logic mentally against edge cases</li>
           </ul>
         </div>
       </div>
@@ -1402,6 +2178,7 @@ git pull --rebase         <span class="cm"># fetch + rebase (linear history)</sp
             <li>"I design triggers to be bulk-safe, logic-less and easy to test, and I move slow work to async processing."</li>
             <li>"I choose the security mechanism deliberately: sharing keyword for records, USER_MODE or stripInaccessible for CRUD and FLS."</li>
             <li>"I keep integrations secret-free in code by using Named Credentials, and decouple them with platform events when it makes sense."</li>
+            <li>"I treat releases as reversible: validated deployments, feature flags and a rollback plan before every production deploy."</li>
           </ul>
         </div>
       </div>
