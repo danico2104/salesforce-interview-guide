@@ -355,6 +355,14 @@
     <a class="nav-link" href="#destructive" data-target="destructive"><span class="dot"></span>Removing Unused Metadata</a>
     <a class="nav-link" href="#rollback" data-target="rollback"><span class="dot"></span>Rolling Back Production</a>
 
+    <a class="nav-link" href="#requiredfield" data-target="requiredfield"><span class="dot"></span>Deploying a New Required Field</a>
+
+    <div class="nav-section">CPQ &amp; Revenue Cloud</div>
+    <a class="nav-link" href="#cpqintro" data-target="cpqintro"><span class="dot"></span>Which CPQ &amp; Edit Lines</a>
+    <a class="nav-link" href="#cpqsubs" data-target="cpqsubs"><span class="dot"></span>CPQ Subscriptions</a>
+    <a class="nav-link" href="#cpqinternals" data-target="cpqinternals"><span class="dot"></span>CPQ Under the Hood</a>
+    <a class="nav-link" href="#cpqqa" data-target="cpqqa"><span class="dot"></span>More CPQ Questions</a>
+
     <div class="nav-section">Wrap-up</div>
     <a class="nav-link" href="#cheat" data-target="cheat"><span class="dot"></span>Quick-Fire Cheat Sheet</a>
     <a class="nav-link" href="#tips" data-target="tips"><span class="dot"></span>Interview Tips</a>
@@ -423,6 +431,11 @@
         <a class="chip" href="#cicd" data-target="cicd"><b>22</b>CI/CD</a>
         <a class="chip" href="#destructive" data-target="destructive"><b>23</b>Removing unused classes &amp; fields</a>
         <a class="chip" href="#rollback" data-target="rollback"><b>24</b>Rolling back a failing release</a>
+        <a class="chip" href="#requiredfield" data-target="requiredfield"><b>25</b>Deploying a new required field</a>
+        <a class="chip" href="#cpqintro" data-target="cpqintro"><b>26</b>Which CPQ &amp; Edit Lines</a>
+        <a class="chip" href="#cpqsubs" data-target="cpqsubs"><b>27</b>CPQ subscriptions</a>
+        <a class="chip" href="#cpqinternals" data-target="cpqinternals"><b>28</b>CPQ under the hood</a>
+        <a class="chip" href="#cpqqa" data-target="cpqqa"><b>29</b>More CPQ questions</a>
       </div>
 
       <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
@@ -2110,6 +2123,405 @@ sf project deploy start --manifest manifest/package.xml \
       </div>
     </section>
 
+    <!-- NEW REQUIRED FIELD -->
+    <section class="section" id="requiredfield">
+      <h2 class="section-title"><span>🧱</span> Deploying a New Required Field Safely</h2>
+      <div class="qbox"><div class="qlabel">Scenario asked</div>
+        <p>A new requirement needs a new <strong>required</strong> field. How would you deploy it without breaking, for example, existing integrations?</p>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="alert alert-info"><span class="alert-icon">🔁</span>
+          <div><strong>Also asked in this interview:</strong> "How do you remove classes or fields from production?" — that one is already answered in <a href="#destructive" data-target="destructive">Removing Unused Classes &amp; Fields</a>, so it isn't repeated here.</div>
+        </div>
+
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Expand → Migrate → Enforce</span></div>
+          <div class="task-body">
+            <p>"I wouldn't ship it as required on day one. I use a phased approach: <strong>deploy the field optional</strong> with field access and layout, <strong>backfill</strong> the existing records, <strong>release the integration changes</strong>, and only then <strong>enforce</strong> the requirement — ideally with a bypassable validation rule or a default value, so callers that don't know about the field never fail. Before deploying I also fix the Apex tests and automations that create records, because a missing required field makes them fail and blocks the deployment."</p>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>Map everything that creates or updates the object</strong> <span class="d">— API integrations and middleware, Data Loader/ETL jobs, Flows, Apex classes and triggers, <em>test data factories</em>, web-to-lead / Experience Cloud forms, email-to-case, and managed packages (which you can't change).</span></div></div>
+          <div class="step"><div class="step-body"><strong>Release 1 — expand</strong> <span class="d">— deploy the field <em>not required</em>, grant access through a permission set (including the integration user), add it to layouts, and set a sensible default value if one exists.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Backfill existing data</strong> <span class="d">— populate legacy records (Bulk API or a batch job) so they don't fail the next time someone edits them.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Release 2 — integrations</strong> <span class="d">— integration owners start sending the value; update the API contract, and regression-test with real payloads in a sandbox.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Fix tests and automation</strong> <span class="d">— update test factories and Flows to populate the field, then run a validate-only deployment with all local tests.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Release 3 — enforce</strong> <span class="d">— activate the validation rule (or make the field required), monitor errors, and keep the rollback trivial: deactivating the rule.</span></div></div>
+        </div>
+
+        <div class="sub-title">🔧 Ways to "make it required" — and how risky each one is</div>
+        <div class="table-wrap"><table>
+          <tr><th>Mechanism</th><th>Enforced for</th><th>Flexibility</th><th>Risk to integrations</th></tr>
+          <tr><td><strong>Field-level "Required"</strong></td><td>UI, API, Apex, Flow — everywhere</td><td>None: always on</td><td><strong>High</strong> — any insert/update that omits it fails</td></tr>
+          <tr><td><strong>Page-layout required</strong></td><td>That layout in the UI only</td><td>Per layout / profile</td><td>Low — API and Apex are unaffected</td></tr>
+          <tr><td><strong>Validation rule</strong></td><td>Everywhere (UI, API, Apex, Flow)</td><td>Bypassable; can target <code>ISNEW()</code>, record types, profiles</td><td>Controllable — you choose who is affected</td></tr>
+          <tr><td><strong>Default value</strong></td><td>Pre-fills when the caller sends nothing</td><td>Static or formula</td><td>Low — verify in a sandbox that your API path picks it up</td></tr>
+          <tr><td><strong>Before-save Flow / trigger default</strong></td><td>Everywhere</td><td>Full control</td><td>Low</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Gradual enforcement with a validation rule</div>
+<pre><span class="cm">// Phase 1 — only NEW records, with a bypass for the integration until it is ready</span>
+AND(
+  ISNEW(),
+  NOT($Permission.Bypass_Validation),
+  ISBLANK(TEXT(Customer_Segment__c))
+)
+
+<span class="cm">// Phase 2 — after the backfill and the integration release: drop ISNEW() so edits are enforced too</span>
+AND(
+  NOT($Permission.Bypass_Validation),
+  ISBLANK(TEXT(Customer_Segment__c))
+)</pre></div>
+
+        <div class="grid2">
+          <div class="code-wrap" style="margin:0;"><div class="code-label">Field metadata — release 1</div>
+<pre>&lt;CustomField xmlns="http://soap.sforce.com/2006/04/metadata"&gt;
+  &lt;fullName&gt;Customer_Segment__c&lt;/fullName&gt;
+  &lt;label&gt;Customer Segment&lt;/label&gt;
+  &lt;type&gt;Picklist&lt;/type&gt;
+  &lt;required&gt;false&lt;/required&gt;   &lt;!-- optional first --&gt;
+  &lt;!-- value set, default value … --&gt;
+&lt;/CustomField&gt;</pre></div>
+          <div class="code-wrap" style="margin:0;"><div class="code-label">Test data factory fix</div>
+<pre><span class="kw">public class</span> TestDataFactory {
+  <span class="kw">public static</span> Account buildAccount(String name) {
+    <span class="kw">return new</span> Account(
+      Name = name,
+      Customer_Segment__c = <span class="str">'SMB'</span>   <span class="cm">// new required field</span>
+    );
+  }
+}</pre></div>
+        </div>
+
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ What breaks if you skip the plan</div>
+            <ul class="crosslist">
+              <li>Apex tests fail with <code>REQUIRED_FIELD_MISSING</code> → the production deployment is blocked</li>
+              <li>Integrations get errors on every insert or update</li>
+              <li>Legacy records fail when someone edits them without a value</li>
+              <li>The integration user has no field access, so it can't even send the value</li>
+              <li>Managed-package code that creates records can't be changed</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Good practices</div>
+            <ul class="checklist">
+              <li>Deploy the field and its access in one release, enforce in a later one</li>
+              <li>Tell integration owners early and version the API contract</li>
+              <li>Test in a Partial Copy / Full sandbox with real payloads</li>
+              <li>Use a Custom Permission as the on/off switch</li>
+              <li>Document the rollback: deactivate the rule, keep the field</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div><strong>Detail that impresses:</strong> checking "Required" on an existing field doesn't change old records, but any later edit of a record that has no value will fail — that's why the backfill comes before enforcement.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPQ: WHICH CPQ & EDIT LINES -->
+    <section class="section" id="cpqintro">
+      <h2 class="section-title"><span>💼</span> Which CPQ? &amp; Edit Lines</h2>
+      <div class="qbox"><div class="qlabel">Questions asked</div>
+        <ul>
+          <li>Which type of CPQ were you working on? I'm trying to understand.</li>
+          <li>Have you worked, for example, with edit lines?</li>
+        </ul>
+      </div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="alert alert-info"><span class="alert-icon">🎯</span>
+          <div>The interviewer wants to know <strong>which product</strong> you used and <strong>how deep your hands-on experience is</strong>. Name the product, the modules you touched and one concrete thing you built. Be honest about the parts you only know in theory.</div>
+        </div>
+
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Answer structure</div><span class="badge b-blue">Fill in with your own experience</span></div>
+          <div class="task-body">
+            <p>"I worked with <strong>Salesforce CPQ</strong> — the managed package with the <code>SBQQ</code> namespace. My scope was <strong>[product bundles, price rules, discount schedules, product rules, subscriptions with amendments and renewals, quote templates]</strong>. And yes, I've worked with <strong>Edit Lines</strong>, which opens the <strong>Quote Line Editor</strong>: I <strong>[customized the columns with the Line Editor field set, added custom actions, wrote a Quote Calculator Plugin, tuned performance]</strong>."</p>
+            <p><strong>If you used Revenue Cloud instead:</strong> say so explicitly — it is a different, native product (see the table), and the follow-up questions will change.</p>
+          </div>
+        </div>
+
+        <div class="sub-title">🗺️ The product landscape</div>
+        <div class="table-wrap"><table>
+          <tr><th>Product</th><th>What it is</th><th>Status</th></tr>
+          <tr><td><strong>Salesforce CPQ</strong></td><td>Managed package (<code>SBQQ</code> namespace, formerly Steelbrick) built on custom objects such as <code>SBQQ__Quote__c</code></td><td>End of Sale since March 2025: existing customers keep using it, renewing and getting support, but it isn't sold to new customers and innovation has moved elsewhere. <strong>End of Sale, not End of Life.</strong></td></tr>
+          <tr><td><strong>Salesforce Billing</strong></td><td>Companion package for orders, invoices and payments on top of CPQ</td><td>Used together with CPQ</td></tr>
+          <tr><td><strong>Revenue Cloud Advanced (RCA)</strong></td><td>Native successor (formerly Revenue Lifecycle Management; part of Agentforce Revenue Management) built on standard platform objects</td><td>The strategic path for new implementations</td></tr>
+          <tr><td><strong>Revenue Cloud Billing</strong></td><td>Billing and collections within the Revenue Cloud suite</td><td>Sold alongside RCA</td></tr>
+        </table></div>
+        <div class="alert alert-warn"><span class="alert-icon">⚠️</span>
+          <div>Because CPQ runs on managed-package custom objects and Revenue Cloud on standard objects, moving from one to the other is largely a <strong>re-implementation</strong>, not an upgrade. Many teams run both in parallel and move customers at renewal.</div>
+        </div>
+
+        <div class="sub-title">✏️ Edit Lines = the Quote Line Editor</div>
+        <div class="task-box">
+          <div class="task-body">
+            <p>"<strong>Edit Lines</strong> is the button on a CPQ quote that opens the <strong>Quote Line Editor (QLE)</strong>. This is where reps add products and bundles (through the configurator), set quantity, discount and term, group lines, <strong>Calculate</strong> and <strong>Save</strong>. Every change can trigger a recalculation through the pricing engine."</p>
+          </div>
+        </div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Customization point</th><th>What it controls in Edit Lines</th></tr>
+          <tr><td><strong>Line Editor field set</strong> (on Quote Line)</td><td>Which columns appear and which are editable</td></tr>
+          <tr><td><strong>Custom Actions</strong></td><td>Extra buttons in the editor or product selection (launch a Flow, open a URL…)</td></tr>
+          <tr><td><strong>Price rules</strong></td><td>Declarative pricing logic that fires during calculation</td></tr>
+          <tr><td><strong>Product rules / option constraints</strong></td><td>Validation, alerts, auto-selection and filtering of options</td></tr>
+          <tr><td><strong>Quote Calculator Plugin (QCP)</strong></td><td>JavaScript hooks around the calculation for complex logic</td></tr>
+          <tr><td><strong>Quote line groups</strong></td><td>Organizing lines (e.g. Hardware / Services), optionally with their own term</td></tr>
+        </table></div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">🐢 Typical problems</div>
+            <ul class="crosslist">
+              <li>The editor is slow with many lines → too many price rules, heavy QCP or formula fields on the line</li>
+              <li>A field doesn't show up → missing from the field set or without field access</li>
+              <li>A discount doesn't apply → wrong evaluation order or event on the price rule</li>
+              <li>Totals are stale after Apex changed lines → the quote wasn't recalculated</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--green);">✅ Things worth saying</div>
+            <ul class="checklist">
+              <li>"I prefer declarative price rules first, QCP only when the logic needs code"</li>
+              <li>"I keep the editor lean: few columns, few rules"</li>
+              <li>"I test calculations with bundles, amendments and large quotes"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPQ: SUBSCRIPTIONS -->
+    <section class="section" id="cpqsubs">
+      <h2 class="section-title"><span>🔄</span> How Subscriptions Work in Salesforce CPQ</h2>
+      <div class="qbox"><div class="qlabel">Question asked</div><p>Can you tell me how subscriptions work in Salesforce CPQ?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Recommended Answer</div><span class="badge b-orange">Quote → Contract → Amend / Renew</span></div>
+          <div class="task-body">
+            <p>"A subscription product is sold on a quote with a <strong>subscription term</strong> and a recurring price. When the opportunity is won and <strong>Contracted</strong> is checked, CPQ creates a <strong>Contract</strong> and one <strong>Subscription record</strong> (<code>SBQQ__Subscription__c</code>) for each subscription line. Those records are the source of truth for what the customer owns. Mid-term changes are <strong>amendments</strong>, which add new subscription records to the <em>same</em> contract with a <strong>prorated</strong> price, and <strong>renewals</strong> are generated automatically before the term ends."</p>
+          </div>
+        </div>
+
+        <div class="code-wrap"><div class="code-label">Lifecycle</div>
+<pre>Opportunity ──▶ Quote (Primary) ──▶ Closed Won + <span class="kw">Contracted</span>
+                                         │
+                                         ▼
+                      Contract ──▶ SBQQ__Subscription__c  (one per subscription line)
+                          │
+          ┌───────────────┴────────────────┐
+          ▼                                ▼
+   <span class="kw">Amend</span> (new Opp + Quote:          <span class="kw">Renew</span> (renewal Opp + Quote
+   change quantity / add products)   generated before the term ends)
+          │ Contracted                     │ Contracted
+          ▼                                ▼
+   SAME contract gets new           A renewal contract for
+   subscription records             the next term</pre></div>
+
+        <div class="sub-title">⚙️ What defines a subscription</div>
+        <div class="table-wrap"><table>
+          <tr><th>Setting</th><th>Meaning</th></tr>
+          <tr><td><strong>Subscription Type</strong></td><td><em>Renewable</em> (renews at the end of the term) · <em>Evergreen</em> (continues until cancelled) · <em>One-time</em> (sold once, not renewed)</td></tr>
+          <tr><td><strong>Subscription Pricing</strong></td><td><em>Fixed Price</em> (price per term from the list price) · <em>Percent Of Total</em> (a percentage of other lines, e.g. support = 20% of licences)</td></tr>
+          <tr><td><strong>Subscription Term</strong></td><td>Length in months (default on the product, overridable on the quote or group). Start date + term = end date</td></tr>
+          <tr><td><strong>Subscription Term Unit / Proration Precision</strong></td><td>Package settings that decide whether proration is calculated by month, by day or month + day</td></tr>
+        </table></div>
+
+        <div class="sub-title">➗ Proration</div>
+        <div class="task-box">
+          <div class="task-body">
+            <p>When a line's <strong>effective term</strong> differs from its <strong>default term</strong>, CPQ scales the price:</p>
+            <div class="code-wrap"><div class="code-label">Formula</div>
+<pre>prorate multiplier = Effective Subscription Term ÷ Default Subscription Term
+prorated price     = subscription price × multiplier
+
+<span class="cm">// Example: 3 extra seats at 1,200 per seat per year (default term 12),
+// added with 8 months left on the contract:
+// 3 × 1,200 × (8 ÷ 12) = 2,400</span></pre></div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-title">✏️ Amendments</div>
+            <ul class="checklist">
+              <li>Started from the contract (<em>Amend</em>): CPQ creates a <strong>new opportunity and quote</strong> with the existing subscriptions</li>
+              <li>You enter the <strong>desired quantity</strong>; CPQ works out the difference (you need 3 more) and prorates the remaining term</li>
+              <li>Contracting the amendment updates the <strong>same contract</strong> with new subscription records — it does not create a new contract</li>
+              <li>Reducing quantity (or setting it to 0) cancels or downgrades</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">🔁 Renewals</div>
+            <ul class="checklist">
+              <li>CPQ can generate the <strong>renewal opportunity</strong> (and quote) before the contract ends, containing the subscription items and quantities</li>
+              <li>Contracted amendments are reflected in the renewal opportunity automatically</li>
+              <li><strong>Uplift %</strong> can raise the price on renewal</li>
+              <li>Renewal model: <em>contract-based</em> or <em>asset-based</em></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <div class="card-title">📈 Multi-Dimensional Quoting (MDQ)</div>
+            <p>For ramp deals (different price or quantity per year), a line is split into <strong>segments</strong>, so each period can carry its own quantity and price while still being one product line.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">🧾 Billing</div>
+            <p>CPQ stores <em>what was sold</em>. Invoicing comes from Salesforce Billing or an external ERP/billing system fed by the order and subscription data.</p>
+          </div>
+        </div>
+
+        <div class="alert alert-success"><span class="alert-icon">🎯</span>
+          <div><strong>Senior answer:</strong> "Subscriptions in CPQ are quote lines with a term and recurring price. Contracting turns them into subscription records on a contract, amendments add prorated records to that same contract, and renewals are generated before it ends. The proration is the effective term divided by the default term."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPQ: UNDER THE HOOD -->
+    <section class="section" id="cpqinternals">
+      <h2 class="section-title"><span>🔬</span> CPQ Under the Hood</h2>
+      <div class="qbox"><div class="qlabel">Follow-up</div><p>Can you explain how CPQ works internally — the data model, the calculation engine and how pricing is built?</p></div>
+      <div class="zone-hint">👆 Practice mode: click the blurred answer to reveal it</div>
+      <div class="answer-zone">
+        <div class="task-box">
+          <div class="task-header"><div class="task-title">💡 Big picture</div><span class="badge b-blue">Architecture</span></div>
+          <div class="task-body">
+            <p>"Salesforce CPQ is a <strong>managed package</strong> that adds custom objects (<code>SBQQ__</code>), triggers, a <strong>calculation engine</strong> and the <strong>Quote Line Editor</strong> on top of standard Opportunity, Product, Price Book, Contract and Order. You can't edit its Apex, so you extend it with <strong>price rules, product rules, a Quote Calculator Plugin, Flows and custom actions</strong>."</p>
+          </div>
+        </div>
+
+        <div class="sub-title">🧬 Data model</div>
+        <div class="code-wrap"><div class="code-label">Core relationships</div>
+<pre>Product2 ──&lt; SBQQ__ProductFeature__c ──&lt; SBQQ__ProductOption__c &gt;── Product2   (bundle structure)
+
+Opportunity 1──&lt; SBQQ__Quote__c (Primary) 1──&lt; SBQQ__QuoteLineGroup__c 1──&lt; SBQQ__QuoteLine__c
+                                                 (price book supplies the list price)
+
+Opportunity ──(Contracted)──▶ Contract 1──&lt; SBQQ__Subscription__c   (recurring lines)
+Quote       ──(Ordered)────▶ Order    1──&lt; OrderItem                (fulfilment / billing)</pre></div>
+
+        <div class="table-wrap"><table>
+          <tr><th>Object</th><th>Role</th></tr>
+          <tr><td><code>SBQQ__Quote__c</code></td><td>The CPQ quote. One quote is flagged <strong>Primary</strong> and syncs its lines to the opportunity</td></tr>
+          <tr><td><code>SBQQ__QuoteLine__c</code></td><td>A priced product line; holds the whole price waterfall plus term and proration fields</td></tr>
+          <tr><td><code>SBQQ__QuoteLineGroup__c</code></td><td>Optional grouping of lines; can carry its own term</td></tr>
+          <tr><td><code>SBQQ__ProductFeature__c</code> / <code>SBQQ__ProductOption__c</code></td><td>Bundles: features group options, and options are the child products</td></tr>
+          <tr><td><code>SBQQ__PriceRule__c</code> (+ conditions, actions)</td><td>Declarative pricing logic</td></tr>
+          <tr><td><code>SBQQ__ProductRule__c</code> (+ conditions, actions)</td><td>Validation, alert, selection and filter logic</td></tr>
+          <tr><td><code>SBQQ__DiscountSchedule__c</code></td><td>Volume discount tiers</td></tr>
+          <tr><td><code>SBQQ__ContractedPrice__c</code></td><td>Customer-specific negotiated prices</td></tr>
+          <tr><td><code>SBQQ__Subscription__c</code></td><td>Recurring entitlement created on contracting; the base for amendments and renewals</td></tr>
+          <tr><td><code>SBQQ__QuoteTemplate__c</code></td><td>Document (PDF) generation for the quote</td></tr>
+        </table></div>
+
+        <div class="sub-title">⚙️ The calculation sequence (simplified)</div>
+        <div class="steps">
+          <div class="step"><div class="step-body"><strong>A trigger event starts the calculator</strong> <span class="d">— a change in the editor, the Calculate button, or the Calculate API.</span></div></div>
+          <div class="step"><div class="step-body"><strong>Formula fields on the lines are evaluated</strong></div></div>
+          <div class="step"><div class="step-body"><strong>QCP <code>onInit</code> (first run) and <code>onBeforeCalculate</code></strong> <span class="d">— the plugin runs before calculation begins, after those formulas.</span></div></div>
+          <div class="step"><div class="step-body"><strong><code>onBeforePriceRules</code> → price rules with the <em>Before Calculate</em> event</strong></div></div>
+          <div class="step"><div class="step-body"><strong>Core pricing</strong> <span class="d">— list price, contracted prices, block pricing, discount schedules, term and proration, bundle roll-ups.</span></div></div>
+          <div class="step"><div class="step-body"><strong><em>On Calculate</em> price rules → <code>onAfterPriceRules</code> → <em>After Calculate</em> price rules</strong></div></div>
+          <div class="step"><div class="step-body"><strong><code>onAfterCalculate</code></strong> <span class="d">— runs when the calculation completes, before formulas are re-evaluated; then totals are shown and Save writes to the database.</span></div></div>
+        </div>
+        <div class="alert alert-info"><span class="alert-icon">💡</span>
+          <div>Interview shortcut: <strong>formulas → plugin "before" → price rules and core pricing → plugin "after" → formulas again.</strong> Inside each stage the rule's <em>Evaluation Order</em> decides the sequence, and price rules have an <em>Evaluation Event</em> (Before / On / After Calculate) and <em>Scope</em> (Calculator / Quote).</div>
+        </div>
+
+        <div class="sub-title">💧 The price waterfall</div>
+        <div class="table-wrap"><table>
+          <tr><th>Step</th><th>Field</th><th>Example</th><th>How it is reached</th></tr>
+          <tr><td>1</td><td><strong>Original Price</strong></td><td>100.00</td><td>List price from the price book</td></tr>
+          <tr><td>2</td><td><strong>Special Price</strong></td><td>100.00</td><td>Contracted price, cost + markup, price-rule overrides</td></tr>
+          <tr><td>3</td><td><strong>Regular Price</strong></td><td>90.00</td><td>After the "regular" adjustments (e.g. discount schedules)</td></tr>
+          <tr><td>4</td><td><strong>Customer Price</strong></td><td>72.00</td><td>After the customer / additional discount</td></tr>
+          <tr><td>5</td><td><strong>Partner Price</strong></td><td>64.80</td><td>Customer Price − Partner Discount</td></tr>
+          <tr><td>6</td><td><strong>Net Price</strong></td><td>58.32</td><td>Partner Price − Distributor Discount</td></tr>
+        </table></div>
+        <p style="color:var(--muted);font-size:.86rem;">The exact order of operations for special and regular price depends on the pricing tools in use, and options can move the partner discount up the waterfall. The net price is what flows to the opportunity amount.</p>
+
+        <div class="sub-title">🧰 The pricing and rules toolbox</div>
+        <div class="table-wrap"><table>
+          <tr><th>Tool</th><th>Purpose</th></tr>
+          <tr><td><strong>Price rules</strong></td><td>Conditions + actions that set or change field values and prices (event, scope, evaluation order)</td></tr>
+          <tr><td><strong>Product rules</strong></td><td>Four types: <em>Validation</em> (error), <em>Alert</em>, <em>Selection</em> (auto add/remove options), <em>Filter</em> (restrict options shown)</td></tr>
+          <tr><td><strong>Option constraints</strong></td><td><em>Dependency</em> (needs another option) and <em>Exclusion</em> (can't be combined)</td></tr>
+          <tr><td><strong>Discount schedules</strong></td><td>Volume pricing: <em>Range</em> (the tier price applies to the whole quantity) or <em>Slab</em> (each tier priced separately)</td></tr>
+          <tr><td><strong>Contracted prices</strong></td><td>A negotiated price for a customer and product</td></tr>
+          <tr><td><strong>Block pricing</strong></td><td>A flat price per quantity band</td></tr>
+          <tr><td><strong>QCP (JavaScript)</strong></td><td>Hooks for logic that rules can't express</td></tr>
+          <tr><td><strong>Custom actions, quote templates, Advanced Approvals</strong></td><td>Editor buttons, documents and approval chains</td></tr>
+        </table></div>
+
+        <div class="code-wrap"><div class="code-label">Quote Calculator Plugin (JavaScript)</div>
+<pre><span class="kw">export function</span> onInit(quoteLineModels) {
+  <span class="kw">return</span> Promise.resolve();            <span class="cm">// optional: runs when the calculator initializes</span>
+}
+
+<span class="kw">export function</span> onBeforeCalculate(quoteModel, quoteLineModels) {
+  quoteLineModels.forEach(<span class="kw">function</span> (line) {
+    <span class="kw">if</span> (line.record[<span class="str">'SBQQ__Quantity__c'</span>] &gt; <span class="num">100</span>) {
+      line.record[<span class="str">'Volume_Flag__c'</span>] = <span class="kw">true</span>;   <span class="cm">// field must be exposed through a field set</span>
+    }
+  });
+  <span class="kw">return</span> Promise.resolve();
+}
+
+<span class="kw">export function</span> onAfterCalculate(quoteModel, quoteLineModels) {
+  <span class="cm">// e.g. compute a custom total after CPQ finished its own pricing</span>
+  <span class="kw">return</span> Promise.resolve();
+}</pre></div>
+        <p style="color:var(--muted);font-size:.86rem;margin-top:-4px;">Fields the plugin reads must be available to the calculator — through the Line Editor or <code>ReferencedFields</code> field sets.</p>
+
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <div class="card-title" style="color:var(--orange);">🚚 CPQ configuration is data, not metadata</div>
+            <p>Products, bundles, price rules, product rules and discount schedules are <strong>records</strong>. They don't travel with change sets or <code>sf project deploy</code>. Move them with a data-deployment tool (for example SFDMU, Gearset or Copado data deployments, or Data Loader with external Ids) as an explicit pipeline step, respecting lookup order.</p>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--red);">⚠️ Performance &amp; pitfalls</div>
+            <ul class="crosslist">
+              <li>Triggers, Flows and heavy QCP on CPQ objects slow the calculation</li>
+              <li>Changing quote lines with Apex doesn't refresh totals — recalculate through the Calculate API</li>
+              <li>Too many price rules or formula fields on the line make the editor sluggish</li>
+              <li>CPQ has a package setting to disable its triggers for data migrations — use it carefully and re-enable it</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPQ: MORE QUESTIONS -->
+    <section class="section" id="cpqqa">
+      <h2 class="section-title"><span>🧠</span> More CPQ Questions to Be Ready For</h2>
+      <p style="color:var(--muted);margin-bottom:12px;">Likely follow-ups once you say you worked with CPQ. Answer in one or two sentences, then offer an example.</p>
+      <div class="table-wrap"><table>
+        <tr><th>Question</th><th>Short answer</th></tr>
+        <tr><td>Price rule vs QCP?</td><td>Price rules are declarative and admin-maintainable; the QCP is JavaScript for logic that rules can't express, such as cross-line calculations. Start with rules.</td></tr>
+        <tr><td>Product rule vs price rule?</td><td>Product rules validate, alert and control which products or options are selected; price rules change field values and prices.</td></tr>
+        <tr><td>Bundle vs option?</td><td>A bundle is a product with features and options; an option is a child product inside the bundle.</td></tr>
+        <tr><td>Amendment vs renewal?</td><td>An amendment changes a contract mid-term (same contract, prorated); a renewal creates the next term's opportunity, quote and contract.</td></tr>
+        <tr><td>Contracted price vs discount schedule?</td><td>A contracted price is negotiated for one customer; a discount schedule gives volume tiers to anyone who buys that quantity.</td></tr>
+        <tr><td>Range vs Slab discount?</td><td>Range: the tier that matches the quantity prices <em>all</em> units. Slab: each tier prices only the units that fall inside it, like tax brackets.</td></tr>
+        <tr><td>What is block pricing?</td><td>A fixed price for a quantity band, independent of the exact quantity inside it.</td></tr>
+        <tr><td>What is the primary quote?</td><td>The one quote per opportunity whose lines sync to the opportunity products and amount.</td></tr>
+        <tr><td>What is MDQ?</td><td>Multi-Dimensional Quoting: segments of one line (for example year 1, year 2) so each period has its own quantity and price.</td></tr>
+        <tr><td>How do you deploy CPQ configuration?</td><td>It is data, so it needs a data-deployment step in the pipeline, not just metadata deployment.</td></tr>
+        <tr><td>Why are totals wrong after an Apex update to lines?</td><td>Lines were changed without recalculating; call the Calculate API so the engine rebuilds the waterfall and totals.</td></tr>
+        <tr><td>What is the future of CPQ?</td><td>CPQ is end of sale (not end of life); Revenue Cloud Advanced is the native successor, and the move is mostly a re-implementation.</td></tr>
+      </table></div>
+    </section>
+
     <!-- CHEAT SHEET -->
     <section class="section" id="cheat">
       <h2 class="section-title"><span>⚡</span> Quick-Fire Cheat Sheet</h2>
@@ -2140,6 +2552,11 @@ sf project deploy start --manifest manifest/package.xml \
         <tr><td>22</td><td>CI/CD</td><td>Git + pipeline: PR validation (analysis, Jest, check-only deploy with tests) → sandboxes → UAT → validated Quick Deploy to production.</td></tr>
         <tr><td>23</td><td>Remove unused metadata</td><td>Analyze dependencies, deprecate, back up, remove references, then destructive changes through every environment.</td></tr>
         <tr><td>24</td><td>Rollback</td><td>No undo button: kill switch first, then revert in Git and redeploy; new components need destructive changes; data needs its own fix.</td></tr>
+        <tr><td>25</td><td>New required field</td><td>Expand → backfill → integrations → enforce: deploy it optional, add a default or a bypassable validation rule, and fix Apex tests and automation first.</td></tr>
+        <tr><td>26</td><td>Which CPQ / Edit Lines</td><td>Salesforce CPQ = SBQQ managed package (end of sale since March 2025; successor Revenue Cloud Advanced). Edit Lines opens the Quote Line Editor, customized with field sets, custom actions and QCP.</td></tr>
+        <tr><td>27</td><td>CPQ subscriptions</td><td>Quote lines with a term → Contracted creates a Contract + <code>SBQQ__Subscription__c</code> records; amendments add prorated records to the same contract; renewals are generated before the term ends.</td></tr>
+        <tr><td>28</td><td>CPQ under the hood</td><td>Managed package + calculator: formulas → QCP before hooks → price rules and core pricing → QCP after hooks. Waterfall: Original → Special → Regular → Customer → Partner → Net.</td></tr>
+        <tr><td>29</td><td>CPQ rules</td><td>Price rules change prices; product rules validate and select; QCP is JavaScript for what rules can't do; CPQ configuration is data and needs a data-deployment step.</td></tr>
       </table></div>
     </section>
 
@@ -2183,7 +2600,7 @@ sf project deploy start --manifest manifest/package.xml \
         </div>
       </div>
 
-      <div class="foot">Independent study guide for interview preparation. Salesforce, Trailhead, Astro, Codey and related marks are trademarks of Salesforce, Inc. Always verify limits and release-specific behavior in the official documentation, as they change between releases.</div>
+      <div class="foot">Made with ❤️ by <a href="https://www.linkedin.com/in/jeisonrios" target="_blank">Jeison Arturo Rios Castaño</a></div>
     </section>
 
   </main>
@@ -2196,7 +2613,7 @@ sf project deploy start --manifest manifest/package.xml \
   /* ═══════════════ MASCOT ═══════════════
      Paste the URL (or a base64 data URI) of the official Trailhead mascot image
      (Astro / Codey) between the quotes. Leave empty to keep the ☁️ placeholder. */
-  var MASCOT_URL = "";
+  var MASCOT_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSzGcq6gTfdvR7ujR5Y-Jq3iRCZXciULFa5ml4o28DL-BUocHOVg-NAj05&s=10";
 
   var slots = document.querySelectorAll('[data-mascot]');
   if (MASCOT_URL) {
